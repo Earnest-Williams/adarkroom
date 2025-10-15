@@ -3,15 +3,69 @@ var Path = {
         _STORES_OFFSET: 0,
         // Everything not in this list weighs 1
         Weight: {
-		'bone spear': 2,
-		'iron sword': 3,
-		'steel sword': 5,
-		'rifle': 5,
-		'bullets': 0.1,
-		'energy cell': 0.2,
-		'laser rifle': 5,
+                'bone spear': 2,
+                'iron sword': 3,
+                'steel sword': 5,
+                'rifle': 5,
+                'bullets': 0.1,
+                'energy cell': 0.2,
+                'laser rifle': 5,
     'plasma rifle': 5,
-		'bolas': 0.5,
+                'bolas': 0.5,
+        },
+        themeVariants: {
+                default: {
+                        outfittingLegend: _('supplies:'),
+                        armourRowLabel: _('armour'),
+                        armourLabels: {
+                                none: _('none'),
+                                'kinetic armour': _('kinetic'),
+                                's armour': _('steel'),
+                                'i armour': _('iron'),
+                                'l armour': _('leather')
+                        },
+                        displayNames: {},
+                        weightAliases: {}
+                },
+                magic: {
+                        outfittingLegend: _('ritual kit:'),
+                        armourRowLabel: _('wards'),
+                        armourLabels: {
+                                none: _('none'),
+                                'kinetic armour': _('aegis field'),
+                                's armour': _('starsteel shell'),
+                                'i armour': _('meteoric mail'),
+                                'l armour': _('warded leathers')
+                        },
+                        displayNames: {
+                                'laser rifle': _('sunshard rifle')
+                        },
+                        weightAliases: {
+                                'witchlight torch': 'torch',
+                                'crystal phial': 'waterskin',
+                                'starlit cask': 'cask',
+                                'everflow tank': 'water tank',
+                                'spiritthorn spear': 'bone spear',
+                                'runed rucksack': 'rucksack',
+                                'levitation wagon': 'wagon',
+                                'astral convoy': 'convoy',
+                                'warded leathers': 'l armour',
+                                'meteoric mail': 'i armour',
+                                'starsteel plate': 's armour',
+                                'meteoric blade': 'iron sword',
+                                'starsteel blade': 'steel sword',
+                                'echo rifle': 'rifle',
+                                'sunshard rifle': 'laser rifle',
+                                'arcane rounds': 'bullets',
+                                'mana battery': 'energy cell',
+                                'binding orbs': 'bolas',
+                                'volatile orb': 'grenade',
+                                'spellblade': 'bayonet',
+                                'eldritch alloy': 'alien alloy',
+                                'mending draught': 'medicine',
+                                'astral jerky': 'cured meat'
+                        }
+                }
         },
 
         name: 'Path',
@@ -21,6 +75,51 @@ var Path = {
         startVariant: 'default',
         tab: null,
         panel: null,
+        getVariantData: function () {
+                var variant = Path.startVariant || Path.options.startVariant || 'default';
+                return Path.themeVariants[variant] || Path.themeVariants.default;
+        },
+        getOutfittingLegend: function () {
+                var data = Path.getVariantData();
+                return data.outfittingLegend || _('supplies:');
+        },
+        getGearDisplayName: function (key, fallback) {
+                var data = Path.getVariantData();
+                if (data.displayNames && data.displayNames[key]) {
+                        return data.displayNames[key];
+                }
+                if (typeof Room !== 'undefined' && typeof Room.getDisplayName === 'function') {
+                        return Room.getDisplayName(key);
+                }
+                if (fallback) {
+                        return fallback;
+                }
+                return _(key);
+        },
+        getArmourRowLabel: function () {
+                var data = Path.getVariantData();
+                return data.armourRowLabel || _('armour');
+        },
+        getArmourLabel: function (key) {
+                var data = Path.getVariantData();
+                if (data.armourLabels && data.armourLabels[key]) {
+                        return data.armourLabels[key];
+                }
+                if (key === 'none') {
+                        return _('none');
+                }
+                if (typeof Room !== 'undefined' && typeof Room.getDisplayName === 'function') {
+                        return Room.getDisplayName(key);
+                }
+                return _(key);
+        },
+        resolveWeightKey: function (thing) {
+                var data = Path.getVariantData();
+                if (data.weightAliases && data.weightAliases[thing]) {
+                        return data.weightAliases[thing];
+                }
+                return thing;
+        },
         resolveStartVariant: function (variant) {
                 return variant === 'magic' ? 'magic' : 'default';
         },
@@ -42,6 +141,10 @@ var Path = {
 
                 if (Path.panel && Path.panel.length) {
                         Path.panel.toggleClass('magic-start', normalized === 'magic');
+                }
+                var outfitting = $('#outfitting');
+                if (outfitting.length) {
+                        outfitting.attr('data-legend', Path.getOutfittingLegend());
                 }
         },
         initMagicStart: function (options) {
@@ -82,7 +185,9 @@ var Path = {
                 this.scroller = $('<div>').attr('id', 'pathScroller').appendTo(this.panel);
 
                 // Add the outfitting area
-                var outfitting = $('<div>').attr({'id': 'outfitting', 'data-legend': _('supplies:')}).appendTo(this.scroller);
+                var outfittingLegend = Path.getOutfittingLegend();
+                var outfitting = $('<div>').attr({'id': 'outfitting'}).appendTo(this.scroller);
+                outfitting.attr('data-legend', outfittingLegend);
 		$('<div>').attr('id', 'bagspace').appendTo(outfitting);
 		
 		// Add the embark button
@@ -121,12 +226,13 @@ var Path = {
                 Notifications.notify(Room, _('the compass points ' + World.dir));
         },
 	
-	getWeight: function(thing) {
-		var w = Path.Weight[thing];
-		if(typeof w != 'number') w = 1;
-		
-		return w;
-	},
+        getWeight: function(thing) {
+                var lookupKey = Path.resolveWeightKey(thing);
+                var w = Path.Weight[lookupKey];
+                if(typeof w != 'number') w = 1;
+
+                return w;
+        },
 	
 	getCapacity: function() {
 		if($SM.get('stores["cargo drone"]', true) > 0) {
@@ -192,35 +298,37 @@ var Path = {
 		}
 		
 		// Add the armour row
-		var armour = _("none");
+                var armour = Path.getArmourLabel('none');
     if($SM.get('stores["kinetic armour"]', true) > 0)
-			armour = _("kinetic");
-		else if($SM.get('stores["s armour"]', true) > 0)
-			armour = _("steel");
-		else if($SM.get('stores["i armour"]', true) > 0)
-			armour = _("iron");
-		else if($SM.get('stores["l armour"]', true) > 0)
-			armour = _("leather");
-		var aRow = $('#armourRow');
-		if(aRow.length === 0) {
-			aRow = $('<div>').attr('id', 'armourRow').addClass('outfitRow').prependTo(outfit);
-			$('<div>').addClass('row_key').text(_('armour')).appendTo(aRow);
-			$('<div>').addClass('row_val').text(armour).appendTo(aRow);
-			$('<div>').addClass('clear').appendTo(aRow);
-		} else {
-			$('.row_val', aRow).text(armour);
-		}
-		
-		// Add the water row
-		var wRow = $('#waterRow');
-		if(wRow.length === 0) {
-			wRow = $('<div>').attr('id', 'waterRow').addClass('outfitRow').insertAfter(aRow);
-			$('<div>').addClass('row_key').text(_('water')).appendTo(wRow);
-			$('<div>').addClass('row_val').text(World.getMaxWater()).appendTo(wRow);
-			$('<div>').addClass('clear').appendTo(wRow);
-		} else {
-			$('.row_val', wRow).text(World.getMaxWater());
-		}
+                        armour = Path.getArmourLabel('kinetic armour');
+                else if($SM.get('stores["s armour"]', true) > 0)
+                        armour = Path.getArmourLabel('s armour');
+                else if($SM.get('stores["i armour"]', true) > 0)
+                        armour = Path.getArmourLabel('i armour');
+                else if($SM.get('stores["l armour"]', true) > 0)
+                        armour = Path.getArmourLabel('l armour');
+                var aRow = $('#armourRow');
+                if(aRow.length === 0) {
+                        aRow = $('<div>').attr('id', 'armourRow').addClass('outfitRow').prependTo(outfit);
+                        $('<div>').addClass('row_key').text(Path.getArmourRowLabel()).appendTo(aRow);
+                        $('<div>').addClass('row_val').text(armour).appendTo(aRow);
+                        $('<div>').addClass('clear').appendTo(aRow);
+                } else {
+                        $('.row_key', aRow).text(Path.getArmourRowLabel());
+                        $('.row_val', aRow).text(armour);
+                }
+
+                // Add the water row
+                var wRow = $('#waterRow');
+                if(wRow.length === 0) {
+                        wRow = $('<div>').attr('id', 'waterRow').addClass('outfitRow').insertAfter(aRow);
+                        $('<div>').addClass('row_key').text(Room.getResourceLabel('water')).appendTo(wRow);
+                        $('<div>').addClass('row_val').text(World.getMaxWater()).appendTo(wRow);
+                        $('<div>').addClass('clear').appendTo(wRow);
+                } else {
+                        $('.row_key', wRow).text(Room.getResourceLabel('water'));
+                        $('.row_val', wRow).text(World.getMaxWater());
+                }
 		
 		var space = Path.getFreeSpace();
 		var currentBagCapacity = 0;
@@ -238,42 +346,45 @@ var Path = {
 			'medicine': {type: 'tool', desc: _('restores') + ' ' + World.MEDS_HEAL + ' ' + _('hp') }
 		}, Room.Craftables, Fabricator.Craftables);
 		
-		for(var k in carryable) {
-			var lk = _(k);
-			var store = carryable[k];
-			var have = $SM.get('stores["'+k+'"]');
-			var num = Path.outfit[k];
-			num = typeof num == 'number' ? num : 0;
-			if (have !== undefined) {
-				if (have < num) { num = have; }
-				$SM.set(k, num, true);
-			}
+                for(var k in carryable) {
+                        var store = carryable[k];
+                        var displayName = Path.getGearDisplayName(k, store.name);
+                        var lk = displayName;
+                        var storeData = $.extend({}, store, { name: displayName });
+                        var have = $SM.get('stores["'+k+'"]');
+                        var num = Path.outfit[k];
+                        num = typeof num == 'number' ? num : 0;
+                        if (have !== undefined) {
+                                if (have < num) { num = have; }
+                                $SM.set(k, num, true);
+                        }
 
-			var row = $('div#outfit_row_' + k.replace(' ', '-'), outfit);
-			if((store.type == 'tool' || store.type == 'weapon') && have > 0) {
-				currentBagCapacity += num * Path.getWeight(k);
-				if(row.length === 0) {
-					row = Path.createOutfittingRow(k, num, store, store.name);
-					
-					var curPrev = null;
-					outfit.children().each(function(i) {
-						var child = $(this);
-						if(child.attr('id').indexOf('outfit_row_') === 0) {
+                        var row = $('div#outfit_row_' + k.replace(' ', '-'), outfit);
+                        if((store.type == 'tool' || store.type == 'weapon') && have > 0) {
+                                currentBagCapacity += num * Path.getWeight(k);
+                                if(row.length === 0) {
+                                        row = Path.createOutfittingRow(k, num, storeData);
+
+                                        var curPrev = null;
+                                        outfit.children().each(function(i) {
+                                                var child = $(this);
+                                                if(child.attr('id').indexOf('outfit_row_') === 0) {
 							var cName = child.children('.row_key').text();
 							if(cName < lk) {
 								curPrev = child.attr('id');
 							}
 						}
 					});
-					if(curPrev == null) {
-						row.insertAfter(wRow);
-					} else {
-						row.insertAfter(outfit.find('#' + curPrev));
-					}
-				} else {
-					$('div#' + row.attr('id') + ' > div.row_val > span', outfit).text(num);
-					$('div#' + row.attr('id') + ' .tooltip .numAvailable', outfit).text(have - num);
-				}
+                                        if(curPrev == null) {
+                                                row.insertAfter(wRow);
+                                        } else {
+                                                row.insertAfter(outfit.find('#' + curPrev));
+                                        }
+                                } else {
+                                        $('div#' + row.attr('id') + ' > div.row_key', outfit).text(displayName);
+                                        $('div#' + row.attr('id') + ' > div.row_val > span', outfit).text(num);
+                                        $('div#' + row.attr('id') + ' .tooltip .numAvailable', outfit).text(have - num);
+                                }
 				if(num === 0) {
 					$('.dnBtn', row).addClass('disabled');
 					$('.dnManyBtn', row).addClass('disabled');
@@ -376,9 +487,9 @@ var Path = {
 		Engine.moveStoresView($('#perks'), transition_diff);
 	},
 	
-	setTitle: function() {
-		document.title = _('A Dusty Path');
-	},
+        setTitle: function() {
+                document.title = Path.getLocationLabel(Path.startVariant || 'default');
+        },
 	
 	embark: function() {
 		for(var k in Path.outfit) {

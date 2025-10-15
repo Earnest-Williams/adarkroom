@@ -8,9 +8,262 @@ var Room = {
 	_BUILDER_STATE_DELAY: 0.5 * 60 * 1000, // time between builder state updates
 	_STOKE_COOLDOWN: 10, // cooldown to stoke the fire
 	_NEED_WOOD_DELAY: 15 * 1000, // from when the stranger shows up, to when you need wood
-	buttons: {},
-	startVariantPrepared: false,
-	Craftables: {
+        buttons: {},
+        startVariantPrepared: false,
+        themeVariants: {
+                default: {
+                        sectionLabels: {
+                                build: _('build:'),
+                                craft: _('craft:'),
+                                buy: _('buy:'),
+                                stores: _('stores'),
+                                weapons: _('weapons')
+                        },
+                        displayNames: {},
+                        craftables: {}
+                },
+                magic: {
+                        sectionLabels: {
+                                build: _('weave:'),
+                                craft: _('enchant:'),
+                                buy: _('barter:'),
+                                stores: _('satchel'),
+                                weapons: _('foci')
+                        },
+                        displayNames: {
+                                'wood': _('witchwood'),
+                                'fur': _('moonhide'),
+                                'meat': _('spectral meat'),
+                                'bait': _('runed bait'),
+                                'leather': _('enchanted leather'),
+                                'cloth': _('spellthread'),
+                                'scales': _('wyrmscale'),
+                                'teeth': _('spirit fang'),
+                                'cured meat': _('astral jerky'),
+                                'iron': _('meteoric iron'),
+                                'coal': _('shadow coal'),
+                                'sulphur': _('brimstone ash'),
+                                'steel': _('starsteel'),
+                                'bullets': _('arcane rounds'),
+                                'energy cell': _('mana battery'),
+                                'bolas': _('binding orbs'),
+                                'grenade': _('volatile orb'),
+                                'bayonet': _('spellblade'),
+                                'alien alloy': _('eldritch alloy'),
+                                'medicine': _('mending draught'),
+                                'compass': _('astral compass'),
+                                'charm': _('warding charm'),
+                                'torch': _('witchlight torch'),
+                                'waterskin': _('crystal phial'),
+                                'cask': _('starlit cask'),
+                                'water': _('moonwater'),
+                                'water tank': _('everflow tank'),
+                                'bone spear': _('spiritthorn spear'),
+                                'rucksack': _('runed rucksack'),
+                                'wagon': _('levitation wagon'),
+                                'convoy': _('astral convoy'),
+                                'l armour': _('warded leathers'),
+                                'i armour': _('meteoric mail'),
+                                's armour': _('starsteel plate'),
+                                'iron sword': _('meteoric blade'),
+                                'steel sword': _('starsteel blade'),
+                                'rifle': _('echo rifle'),
+                                'laser rifle': _('sunshard rifle'),
+                                'kinetic armour': _('kinetic aegis'),
+                                'trap': _('glyph snare'),
+                                'baited trap': _('baited glyph snare'),
+                                'cart': _('levitation sled'),
+                                'hut': _('mystic hut'),
+                                'lodge': _('moon lodge'),
+                                'trading post': _('arcane bazaar'),
+                                'tannery': _('essence tanner'),
+                                'smokehouse': _('spirit kiln'),
+                                'workshop': _('enchanter\'s atelier'),
+                                'steelworks': _('starforge'),
+                                'armoury': _('arcane arsenal')
+                        },
+                        craftables: {
+                                'trap': {
+                                        name: _('glyph snare'),
+                                        availableMsg: _('builder murmurs about weaving glyph snares to catch wandering spirits.'),
+                                        buildMsg: _('more glyph snares to bind more spirits'),
+                                        maxMsg: _('no more sigils will hold now')
+                                },
+                                'cart': {
+                                        name: _('levitation sled'),
+                                        availableMsg: _('builder says she can charm a sled to carry witchwood'),
+                                        buildMsg: _('the levitation sled hums, ready to glide with timber')
+                                },
+                                'hut': {
+                                        name: _('mystic hut'),
+                                        availableMsg: _('builder says other wanderers of the craft will come if there is space'),
+                                        buildMsg: _('a mystic hut rises, its wards beckoning others'),
+                                        maxMsg: _('no room remains for more mystic huts')
+                                },
+                                'lodge': {
+                                        name: _('moon lodge'),
+                                        availableMsg: _('villagers could hunt shades, given the means'),
+                                        buildMsg: _('the moon lodge glows faintly out in the woods')
+                                },
+                                'trading post': {
+                                        name: _('arcane bazaar'),
+                                        availableMsg: _('an arcane bazaar would steady the flow of curios'),
+                                        buildMsg: _('nomads linger under the bazaar\'s lanterns')
+                                },
+                                'tannery': {
+                                        name: _('essence tanner'),
+                                        availableMsg: _('builder says cured moonhide could prove useful'),
+                                        buildMsg: _('incense curls as the essence tanner opens for work')
+                                },
+                                'smokehouse': {
+                                        name: _('spirit kiln'),
+                                        availableMsg: _('builder says she can bind the essence before it fades'),
+                                        buildMsg: _('builder finishes the spirit kiln. she looks hungry.')
+                                },
+                                'workshop': {
+                                        name: _('enchanter\'s atelier'),
+                                        availableMsg: _('builder says she could weave finer things with proper foci'),
+                                        buildMsg: _('the atelier hums with latent power')
+                                },
+                                'steelworks': {
+                                        name: _('starforge'),
+                                        availableMsg: _('builder says the villagers could forge starsteel with the right sigils'),
+                                        buildMsg: _('a haze of starlight settles as the starforge awakens')
+                                },
+                                'armoury': {
+                                        name: _('arcane arsenal'),
+                                        availableMsg: _('builder says it would help to conjure rounds without pause'),
+                                        buildMsg: _('the arcane arsenal crackles with remembered wars')
+                                },
+                                'torch': {
+                                        name: _('witchlight torch'),
+                                        buildMsg: _('a witchlight torch to hold back the dark')
+                                },
+                                'waterskin': {
+                                        name: _('crystal phial'),
+                                        buildMsg: _('the phial will hold a little more moonwater')
+                                },
+                                'cask': {
+                                        name: _('starlit cask'),
+                                        buildMsg: _('the cask safeguards enough water for longer rituals')
+                                },
+                                'water tank': {
+                                        name: _('everflow tank'),
+                                        buildMsg: _('never thirst beneath the wards again')
+                                },
+                                'bone spear': {
+                                        name: _('spiritthorn spear'),
+                                        buildMsg: _('not elegant, but keen enough to pierce restless spirits')
+                                },
+                                'rucksack': {
+                                        name: _('runed rucksack'),
+                                        buildMsg: _('sigils make carrying more feel almost weightless')
+                                },
+                                'wagon': {
+                                        name: _('levitation wagon'),
+                                        buildMsg: _('the wagon floats, eager to haul enchanted goods')
+                                },
+                                'convoy': {
+                                        name: _('astral convoy'),
+                                        buildMsg: _('the convoy can haul nearly everything the village can craft')
+                                },
+                                'l armour': {
+                                        name: _('warded leathers'),
+                                        buildMsg: _('wards woven into leather offer better than rags')
+                                },
+                                'i armour': {
+                                        name: _('meteoric mail'),
+                                        buildMsg: _('meteoric mail wards more blows than leather')
+                                },
+                                's armour': {
+                                        name: _('starsteel plate'),
+                                        buildMsg: _('starsteel turns aside nearly anything')
+                                },
+                                'iron sword': {
+                                        name: _('meteoric blade'),
+                                        buildMsg: _('the meteoric blade sings with old light')
+                                },
+                                'steel sword': {
+                                        name: _('starsteel blade'),
+                                        buildMsg: _('the starsteel blade rings true')
+                                },
+                                'rifle': {
+                                        name: _('echo rifle'),
+                                        buildMsg: _('an echo rifle, black powder bound with sigils')
+                                }
+                        }
+                }
+        },
+        getVariantData: function () {
+                var variant = Room.getStartVariant ? Room.getStartVariant() : 'default';
+                return Room.themeVariants[variant] || Room.themeVariants.default;
+        },
+
+        getSectionLabel: function (section, fallback) {
+                var data = Room.getVariantData();
+                if (data.sectionLabels && data.sectionLabels[section]) {
+                        return data.sectionLabels[section];
+                }
+                return fallback;
+        },
+
+        getCraftableVariantField: function (key, field) {
+                var data = Room.getVariantData();
+                if (data.craftables && data.craftables[key] && data.craftables[key][field]) {
+                        return data.craftables[key][field];
+                }
+                return null;
+        },
+
+        getCraftableName: function (key) {
+                var override = Room.getCraftableVariantField(key, 'name');
+                if (override) {
+                        return override;
+                }
+                var craftable = Room.Craftables && Room.Craftables[key];
+                if (craftable && craftable.name) {
+                        return craftable.name;
+                }
+                return _(key);
+        },
+
+        getCraftableText: function (key, field) {
+                var override = Room.getCraftableVariantField(key, field);
+                if (override) {
+                        return override;
+                }
+                var craftable = Room.Craftables && Room.Craftables[key];
+                if (craftable && craftable[field]) {
+                        return craftable[field];
+                }
+                return null;
+        },
+
+        getDisplayName: function (key) {
+                var data = Room.getVariantData();
+                if (data.displayNames && data.displayNames[key]) {
+                        return data.displayNames[key];
+                }
+                if (Room.Craftables && Room.Craftables[key] && Room.Craftables[key].name) {
+                        return Room.Craftables[key].name;
+                }
+                if (Room.TradeGoods && Room.TradeGoods[key] && Room.TradeGoods[key].name) {
+                        return Room.TradeGoods[key].name;
+                }
+                if (Room.MiscItems && Room.MiscItems[key] && Room.MiscItems[key].name) {
+                        return Room.MiscItems[key].name;
+                }
+                if (typeof Fabricator !== 'undefined' && Fabricator.Craftables && Fabricator.Craftables[key] && Fabricator.Craftables[key].name) {
+                        return Fabricator.Craftables[key].name;
+                }
+                return _(key);
+        },
+
+        getResourceLabel: function (key) {
+                return Room.getDisplayName(key);
+        },
+
+        Craftables: {
 		'trap': {
 			name: _('trap'),
 			button: null,
@@ -891,13 +1144,13 @@ var Room = {
 		var special = $('div#special');
 		var weapons = $('div#weapons');
 		var needsAppend = false, rNeedsAppend = false, sNeedsAppend = false, wNeedsAppend = false, newRow = false;
-		if (stores.length === 0) {
-			stores = $('<div>').attr({
-				'id': 'stores',
-				'data-legend': _('stores')
-			}).css('opacity', 0);
-			needsAppend = true;
-		}
+                if (stores.length === 0) {
+                        stores = $('<div>').attr({
+                                'id': 'stores'
+                        }).css('opacity', 0);
+                        needsAppend = true;
+                }
+                stores.attr('data-legend', Room.getSectionLabel('stores', _('stores')));
 		if (resources.length === 0) {
 			resources = $('<div>').attr({
 				id: 'resources'
@@ -910,13 +1163,13 @@ var Room = {
 			}).css('opacity', 0);
 			sNeedsAppend = true;
 		}
-		if (weapons.length === 0) {
-			weapons = $('<div>').attr({
-				'id': 'weapons',
-				'data-legend': _('weapons')
-			}).css('opacity', 0);
-			wNeedsAppend = true;
-		}
+                if (weapons.length === 0) {
+                        weapons = $('<div>').attr({
+                                'id': 'weapons'
+                        }).css('opacity', 0);
+                        wNeedsAppend = true;
+                }
+                weapons.attr('data-legend', Room.getSectionLabel('weapons', _('weapons')));
 		for (var k in $SM.get('stores')) {
 
 			if (k.indexOf('blueprint') > 0) {
@@ -924,9 +1177,8 @@ var Room = {
 				continue;
 			}
 
-			const good =
+                        const good =
         Room.Craftables[k] ||
-        Room.TradeGoods[k] ||
         Room.TradeGoods[k] ||
         Room.MiscItems[k] ||
         Fabricator.Craftables[k];
@@ -962,7 +1214,7 @@ var Room = {
 				$SM.set('stores["' + k + '"]', 0);
 			}
 
-			var lk = _(k);
+                        var lk = Room.getDisplayName(k);
 
 			// thieves?
 			if (typeof $SM.get('game.thieves') == 'undefined' && num > 5000 && $SM.get('features.location.world')) {
@@ -971,16 +1223,16 @@ var Room = {
 
 			if (row.length === 0) {
 				row = $('<div>').attr('id', id).addClass('storeRow');
-				$('<div>').addClass('row_key').text(lk).appendTo(row);
+                                $('<div>').addClass('row_key').text(lk).appendTo(row);
 				$('<div>').addClass('row_val').text(Math.floor(num)).appendTo(row);
 				$('<div>').addClass('clear').appendTo(row);
 				var curPrev = null;
 				location.children().each(function (i) {
 					var child = $(this);
-					var cName = child.children('.row_key').text();
-					if (cName < lk) {
-						curPrev = child.attr('id');
-					}
+                                        var cName = child.children('.row_key').text();
+                                        if (cName < lk) {
+                                                curPrev = child.attr('id');
+                                        }
 				});
 				if (curPrev == null) {
 					row.prependTo(location);
@@ -989,7 +1241,8 @@ var Room = {
 				}
 				newRow = true;
 			} else {
-				$('div#' + row.attr('id') + ' > div.row_val', location).text(Math.floor(num));
+                                $('div#' + row.attr('id') + ' > div.row_key', location).text(Room.getDisplayName(k));
+                                $('div#' + row.attr('id') + ' > div.row_val', location).text(Math.floor(num));
 			}
 		}
 
@@ -1041,7 +1294,11 @@ var Room = {
 				var income = $SM.get('income["' + incomeSource + '"]');
 				for (var store in income.stores) {
 					if (store == storeName && income.stores[store] !== 0) {
-						$('<div>').addClass('row_key').text(_(incomeSource)).appendTo(tt);
+                                                var incomeLabel = _(incomeSource);
+                                                if (typeof Outside !== 'undefined' && typeof Outside.getWorkerDisplayName === 'function') {
+                                                        incomeLabel = Outside.getWorkerDisplayName(incomeSource);
+                                                }
+                                                $('<div>').addClass('row_key').text(incomeLabel).appendTo(tt);
 						$('<div>')
 							.addClass('row_val')
 							.text(Engine.getIncomeMsg(income.stores[store], income.delay))
@@ -1076,11 +1333,11 @@ var Room = {
 		var cost = good.cost();
 		for (var k in cost) {
 			var have = $SM.get('stores["' + k + '"]', true);
-			if (have < cost[k]) {
-				Notifications.notify(Room, _("not enough " + k));
-				return false;
-			} else {
-				storeMod[k] = have - cost[k];
+                        if (have < cost[k]) {
+                                Notifications.notify(Room, _('not enough {0}', Room.getResourceLabel(k)));
+                                return false;
+                        } else {
+                                storeMod[k] = have - cost[k];
 			}
 		}
 		$SM.setM('stores', storeMod);
@@ -1123,16 +1380,19 @@ var Room = {
 		var cost = craftable.cost();
 		for (var k in cost) {
 			var have = $SM.get('stores["' + k + '"]', true);
-			if (have < cost[k]) {
-				Notifications.notify(Room, _("not enough " + k));
-				return false;
-			} else {
-				storeMod[k] = have - cost[k];
+                        if (have < cost[k]) {
+                                Notifications.notify(Room, _('not enough {0}', Room.getResourceLabel(k)));
+                                return false;
+                        } else {
+                                storeMod[k] = have - cost[k];
 			}
 		}
 		$SM.setM('stores', storeMod);
 
-		Notifications.notify(Room, craftable.buildMsg);
+                var buildMsg = Room.getCraftableText(thing, 'buildMsg');
+                if (buildMsg) {
+                        Notifications.notify(Room, buildMsg);
+                }
 
 		switch (craftable.type) {
 			case 'good':
@@ -1189,9 +1449,12 @@ var Room = {
 
 		Room.buttons[thing] = true;
 		//don't notify if it has already been built before
-		if (!$SM.get('game.buildings["' + thing + '"]')) {
-			Notifications.notify(Room, craftable.availableMsg);
-		}
+                if (!$SM.get('game.buildings["' + thing + '"]')) {
+                        var availableMsg = Room.getCraftableText(thing, 'availableMsg');
+                        if (availableMsg) {
+                                Notifications.notify(Room, availableMsg);
+                        }
+                }
 		return true;
 	},
 
@@ -1208,26 +1471,36 @@ var Room = {
 	},
 
 	updateBuildButtons: function () {
-		var buildSection = $('#buildBtns');
-		var needsAppend = false;
-		if (buildSection.length === 0) {
-			buildSection = $('<div>').attr({ 'id': 'buildBtns', 'data-legend': _('build:') }).css('opacity', 0);
-			needsAppend = true;
-		}
+                var buildSection = $('#buildBtns');
+                var needsAppend = false;
+                var buildLegend = Room.getSectionLabel('build', _('build:'));
+                if (buildSection.length === 0) {
+                        buildSection = $('<div>').attr({ 'id': 'buildBtns' }).css('opacity', 0);
+                        needsAppend = true;
+                }
+                buildSection.attr('data-legend', buildLegend);
 
-		var craftSection = $('#craftBtns');
-		var cNeedsAppend = false;
-		if (craftSection.length === 0 && $SM.get('game.buildings["workshop"]', true) > 0) {
-			craftSection = $('<div>').attr({ 'id': 'craftBtns', 'data-legend': _('craft:') }).css('opacity', 0);
-			cNeedsAppend = true;
-		}
+                var craftSection = $('#craftBtns');
+                var cNeedsAppend = false;
+                var craftLegend = Room.getSectionLabel('craft', _('craft:'));
+                if (craftSection.length === 0 && $SM.get('game.buildings["workshop"]', true) > 0) {
+                        craftSection = $('<div>').attr({ 'id': 'craftBtns' }).css('opacity', 0);
+                        cNeedsAppend = true;
+                }
+                if (craftSection.length > 0) {
+                        craftSection.attr('data-legend', craftLegend);
+                }
 
-		var buySection = $('#buyBtns');
-		var bNeedsAppend = false;
-		if (buySection.length === 0 && $SM.get('game.buildings["trading post"]', true) > 0) {
-			buySection = $('<div>').attr({ 'id': 'buyBtns', 'data-legend': _('buy:') }).css('opacity', 0);
-			bNeedsAppend = true;
-		}
+                var buySection = $('#buyBtns');
+                var bNeedsAppend = false;
+                var buyLegend = Room.getSectionLabel('buy', _('buy:'));
+                if (buySection.length === 0 && $SM.get('game.buildings["trading post"]', true) > 0) {
+                        buySection = $('<div>').attr({ 'id': 'buyBtns' }).css('opacity', 0);
+                        bNeedsAppend = true;
+                }
+                if (buySection.length > 0) {
+                        buySection.attr('data-legend', buyLegend);
+                }
 
 		for (var k in Room.Craftables) {
 			craftable = Room.Craftables[k];
@@ -1235,31 +1508,49 @@ var Room = {
 			if (craftable.button == null) {
 				if (Room.craftUnlocked(k)) {
 					var loc = Room.needsWorkshop(craftable.type) ? craftSection : buildSection;
-					craftable.button = new Button.Button({
-						id: 'build_' + k.replace(/ /g, '-'),
-						cost: craftable.cost(),
-						text: _(k),
-						click: Room.build,
-						width: '80px',
-						ttPos: loc.children().length > 10 ? 'top right' : 'bottom right'
-					}).css('opacity', 0).attr('buildThing', k).appendTo(loc).animate({ opacity: 1 }, 300, 'linear');
-				}
-			} else {
-				// refresh the tooltip
-				var costTooltip = $('.tooltip', craftable.button);
-				costTooltip.empty();
-				var cost = craftable.cost();
-				for (var c in cost) {
-					$("<div>").addClass('row_key').text(_(c)).appendTo(costTooltip);
-					$("<div>").addClass('row_val').text(cost[c]).appendTo(costTooltip);
-				}
-				if (max && !craftable.button.hasClass('disabled')) {
-					Notifications.notify(Room, craftable.maxMsg);
-				}
-			}
-			if (max) {
-				Button.setDisabled(craftable.button, true);
-			} else {
+                                        craftable.button = new Button.Button({
+                                                id: 'build_' + k.replace(/ /g, '-'),
+                                                cost: craftable.cost(),
+                                                text: Room.getCraftableName(k),
+                                                click: Room.build,
+                                                width: '80px',
+                                                ttPos: loc.children().length > 10 ? 'top right' : 'bottom right'
+                                        }).css('opacity', 0).attr('buildThing', k).appendTo(loc).animate({ opacity: 1 }, 300, 'linear');
+                                        var newCostTooltip = $('.tooltip', craftable.button);
+                                        if (newCostTooltip.length) {
+                                                newCostTooltip.empty();
+                                                var newCost = craftable.cost();
+                                                for (var nc in newCost) {
+                                                        $('<div>').addClass('row_key').text(Room.getResourceLabel(nc)).appendTo(newCostTooltip);
+                                                        $('<div>').addClass('row_val').text(newCost[nc]).appendTo(newCostTooltip);
+                                                }
+                                        }
+                                }
+                        } else {
+                                var buttonTextNode = craftable.button.contents().filter(function () {
+                                        return this.nodeType === 3;
+                                }).first();
+                                if (buttonTextNode.length) {
+                                        buttonTextNode[0].nodeValue = Room.getCraftableName(k);
+                                }
+                                // refresh the tooltip
+                                var costTooltip = $('.tooltip', craftable.button);
+                                costTooltip.empty();
+                                var cost = craftable.cost();
+                                for (var c in cost) {
+                                        $("<div>").addClass('row_key').text(Room.getResourceLabel(c)).appendTo(costTooltip);
+                                        $("<div>").addClass('row_val').text(cost[c]).appendTo(costTooltip);
+                                }
+                                if (max && !craftable.button.hasClass('disabled')) {
+                                        var maxMsg = Room.getCraftableText(k, 'maxMsg');
+                                        if (maxMsg) {
+                                                Notifications.notify(Room, maxMsg);
+                                        }
+                                }
+                        }
+                        if (max) {
+                                Button.setDisabled(craftable.button, true);
+                        } else {
 				Button.setDisabled(craftable.button, false);
 			}
 		}
@@ -1269,27 +1560,42 @@ var Room = {
 			var goodsMax = $SM.num(g, good) + 1 > good.maximum;
 			if (good.button == null) {
 				if (Room.buyUnlocked(g)) {
-					good.button = new Button.Button({
-						id: 'build_' + g,
-						cost: good.cost(),
-						text: _(g),
-						click: Room.buy,
-						width: '80px',
-						ttPos: buySection.children().length > 10 ? 'top right' : 'bottom right'
-					}).css('opacity', 0).attr('buildThing', g).appendTo(buySection).animate({ opacity: 1 }, 300, 'linear');
-				}
-			} else {
-				// refresh the tooltip
-				var goodsCostTooltip = $('.tooltip', good.button);
-				goodsCostTooltip.empty();
-				var goodCost = good.cost();
-				for (var gc in goodCost) {
-					$("<div>").addClass('row_key').text(_(gc)).appendTo(goodsCostTooltip);
-					$("<div>").addClass('row_val').text(goodCost[gc]).appendTo(goodsCostTooltip);
-				}
-				if (goodsMax && !good.button.hasClass('disabled')) {
-					Notifications.notify(Room, good.maxMsg);
-				}
+                                        good.button = new Button.Button({
+                                                id: 'build_' + g,
+                                                cost: good.cost(),
+                                                text: Room.getDisplayName(g),
+                                                click: Room.buy,
+                                                width: '80px',
+                                                ttPos: buySection.children().length > 10 ? 'top right' : 'bottom right'
+                                        }).css('opacity', 0).attr('buildThing', g).appendTo(buySection).animate({ opacity: 1 }, 300, 'linear');
+                                        var newGoodsTooltip = $('.tooltip', good.button);
+                                        if (newGoodsTooltip.length) {
+                                                newGoodsTooltip.empty();
+                                                var baseCost = good.cost();
+                                                for (var bc in baseCost) {
+                                                        $('<div>').addClass('row_key').text(Room.getResourceLabel(bc)).appendTo(newGoodsTooltip);
+                                                        $('<div>').addClass('row_val').text(baseCost[bc]).appendTo(newGoodsTooltip);
+                                                }
+                                        }
+                                }
+                        } else {
+                                var goodTextNode = good.button.contents().filter(function () {
+                                        return this.nodeType === 3;
+                                }).first();
+                                if (goodTextNode.length) {
+                                        goodTextNode[0].nodeValue = Room.getDisplayName(g);
+                                }
+                                // refresh the tooltip
+                                var goodsCostTooltip = $('.tooltip', good.button);
+                                goodsCostTooltip.empty();
+                                var goodCost = good.cost();
+                                for (var gc in goodCost) {
+                                        $("<div>").addClass('row_key').text(Room.getResourceLabel(gc)).appendTo(goodsCostTooltip);
+                                        $("<div>").addClass('row_val').text(goodCost[gc]).appendTo(goodsCostTooltip);
+                                }
+                                if (goodsMax && !good.button.hasClass('disabled')) {
+                                        Notifications.notify(Room, good.maxMsg);
+                                }
 			}
 			if (goodsMax) {
 				Button.setDisabled(good.button, true);

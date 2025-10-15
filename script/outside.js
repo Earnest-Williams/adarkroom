@@ -16,14 +16,14 @@ var Outside = {
         _POP_DELAY: [0.5, 3],
 	_HUT_ROOM: 4,
 	
-	_INCOME: {
-		'gatherer': {
-			name: _('gatherer'),
-			delay: 10,
-			stores: {
-				'wood': 1
-			}
-		},
+        _INCOME: {
+                'gatherer': {
+                        name: _('gatherer'),
+                        delay: 10,
+                        stores: {
+                                'wood': 1
+                        }
+                },
 		'hunter': {
 			name: _('hunter'),
 			delay: 10,
@@ -90,20 +90,82 @@ var Outside = {
 				'steel': 1
 			}
 		},
-		'armourer': {
-			name: _('armourer'),
-			delay: 10,
-			stores: {
-				'steel': -1,
-				'sulphur': -1,
-				'bullets': 1
-			}
-		}
-	},
-	_timeDisplay: null,
-	_weatherDisplay: null,
-	_shelterButton: null,
-	_shelterLabel: null,
+                'armourer': {
+                        name: _('armourer'),
+                        delay: 10,
+                        stores: {
+                                'steel': -1,
+                                'sulphur': -1,
+                                'bullets': 1
+                        }
+                }
+        },
+        themeVariants: {
+                default: {
+                        gatherActionText: _('gather wood'),
+                        gatherNotification: _('dry brush and dead branches litter the forest floor'),
+                        shelterLabel: _('take shelter'),
+                        workerNames: {
+                                'gatherer': _('gatherer'),
+                                'hunter': _('hunter'),
+                                'trapper': _('trapper'),
+                                'tanner': _('tanner'),
+                                'charcutier': _('charcutier'),
+                                'iron miner': _('iron miner'),
+                                'coal miner': _('coal miner'),
+                                'sulphur miner': _('sulphur miner'),
+                                'steelworker': _('steelworker'),
+                                'armourer': _('armourer')
+                        }
+                },
+                magic: {
+                        gatherActionText: _('harvest witchwood'),
+                        gatherNotification: _('witchwood branches glimmer across the enchanted clearing'),
+                        shelterLabel: _('raise ward'),
+                        workerNames: {
+                                'gatherer': _('grove tender'),
+                                'hunter': _('star hunter'),
+                                'trapper': _('sigil snarer'),
+                                'tanner': _('essence binder'),
+                                'charcutier': _('spirit smoker'),
+                                'iron miner': _('meteor miner'),
+                                'coal miner': _('shadow delver'),
+                                'sulphur miner': _('ember seeker'),
+                                'steelworker': _('starforger'),
+                                'armourer': _('arcane munitionsmith')
+                        }
+                }
+        },
+        getVariantData: function () {
+                var variant = Outside.startVariant || Outside.options.startVariant || 'default';
+                return Outside.themeVariants[variant] || Outside.themeVariants.default;
+        },
+        getGatherText: function () {
+                var data = Outside.getVariantData();
+                return data.gatherActionText || _('gather wood');
+        },
+        getGatherMessage: function () {
+                var data = Outside.getVariantData();
+                return data.gatherNotification || _('dry brush and dead branches litter the forest floor');
+        },
+        getShelterLabel: function () {
+                var data = Outside.getVariantData();
+                return data.shelterLabel || _('take shelter');
+        },
+        getWorkerDisplayName: function (key) {
+                var data = Outside.getVariantData();
+                if (data.workerNames && data.workerNames[key]) {
+                        return data.workerNames[key];
+                }
+                if (Outside._INCOME[key] && Outside._INCOME[key].name) {
+                        return Outside._INCOME[key].name;
+                }
+                return _(key);
+        },
+        _timeDisplay: null,
+        _weatherDisplay: null,
+        _shelterButton: null,
+        _shelterLabel: null,
 	TrapDrops: [
 		{
 			rollUnder: 0.5,
@@ -161,6 +223,18 @@ var Outside = {
                 if (Outside.panel && Outside.panel.length) {
                         Outside.panel.toggleClass('magic-start', normalized === 'magic');
                 }
+                if (Outside._shelterLabel && Outside._shelterLabel.length) {
+                        Outside._shelterLabel.text(Outside.getShelterLabel());
+                }
+                var gatherButton = $('#gatherButton');
+                if (gatherButton.length) {
+                        var textNode = gatherButton.contents().filter(function () {
+                                return this.nodeType === 3;
+                        }).first();
+                        if (textNode.length) {
+                                textNode[0].nodeValue = Outside.getGatherText();
+                        }
+                }
         },
 
         initMagicStart: function (options) {
@@ -212,7 +286,7 @@ var Outside = {
 			click: Outside.takeShelter,
 			width: '120px'
 		}).appendTo(shelterRow);
-		Outside._shelterLabel = $('<span>').addClass('buttonLabel').text(_('take shelter')).prependTo(Outside._shelterButton);
+                Outside._shelterLabel = $('<span>').addClass('buttonLabel').text(Outside.getShelterLabel()).prependTo(Outside._shelterButton);
 		Outside._shelterButton.hide();
 
 		//subscribe to stateUpdates
@@ -235,7 +309,7 @@ var Outside = {
 		// Create the gather button
 		new Button.Button({
 			id: 'gatherButton',
-			text: _("gather wood"),
+                        text: Outside.getGatherText(),
 			click: Outside.gatherWood,
 			cooldown: Outside._GATHER_DELAY,
 			width: '80px'
@@ -343,24 +417,25 @@ var Outside = {
 		var numGatherers = $SM.get('game.population');
 		var gatherer = $('div#workers_row_gatherer', workers);
 		
-		for(var k in $SM.get('game.workers')) {
-			var lk = _(k);
-			var workerCount = $SM.get('game.workers["'+k+'"]');
-			var row = $('div#workers_row_' + k.replace(' ', '-'), workers);
-			if(row.length === 0) {
-				row = Outside.makeWorkerRow(k, workerCount);
-				
-				var curPrev = null;
-				workers.children().each(function(i) {
-					var child = $(this);
-					var cName = child.children('.row_key').text();
-					if(cName != 'gatherer') {
-						if(cName < lk) {
-							curPrev = child.attr('id');
-						}
-					}
-				});
-				if(curPrev == null && gatherer.length === 0) {
+                for(var k in $SM.get('game.workers')) {
+                        var lk = Outside.getWorkerDisplayName(k);
+                        var workerCount = $SM.get('game.workers["'+k+'"]');
+                        var row = $('div#workers_row_' + k.replace(' ', '-'), workers);
+                        if(row.length === 0) {
+                                row = Outside.makeWorkerRow(k, workerCount);
+
+                                var curPrev = null;
+                                workers.children().each(function(i) {
+                                        var child = $(this);
+                                        var childKey = child.attr('key');
+                                        if(childKey && childKey != 'gatherer') {
+                                                var cName = Outside.getWorkerDisplayName(childKey);
+                                                if(cName < lk) {
+                                                        curPrev = child.attr('id');
+                                                }
+                                        }
+                                });
+                                if(curPrev == null && gatherer.length === 0) {
 					row.prependTo(workers);
 				} else if(curPrev == null) {
 					row.insertAfter(gatherer);
@@ -369,8 +444,9 @@ var Outside = {
 				}
 				
 			} else {
-				$('div#' + row.attr('id') + ' > div.row_val > span', workers).text(workerCount);
-			}
+                                $('div#' + row.attr('id') + ' > div.row_key', workers).text(Outside.getWorkerDisplayName(k));
+                                $('div#' + row.attr('id') + ' > div.row_val > span', workers).text(workerCount);
+                        }
 			numGatherers -= workerCount;
 			if(workerCount === 0) {
 				$('.dnBtn', row).addClass('disabled');
@@ -385,7 +461,8 @@ var Outside = {
 			gatherer = Outside.makeWorkerRow('gatherer', numGatherers);
 			gatherer.prependTo(workers);
 		} else {
-			$('div#workers_row_gatherer > div.row_val > span', workers).text(numGatherers);
+                        $('div#workers_row_gatherer > div.row_key', workers).text(Outside.getWorkerDisplayName('gatherer'));
+                        $('div#workers_row_gatherer > div.row_val > span', workers).text(numGatherers);
 		}
 		
 		if(numGatherers === 0) {
@@ -411,13 +488,12 @@ var Outside = {
 	},
 	
 	makeWorkerRow: function(key, num) {
-		name = Outside._INCOME[key].name;
-		if(!name) name = key;
-		var row = $('<div>')
-			.attr('key', key)
-			.attr('id', 'workers_row_' + key.replace(' ','-'))
-			.addClass('workerRow');
-		$('<div>').addClass('row_key').text(name).appendTo(row);
+                var name = Outside.getWorkerDisplayName(key);
+                var row = $('<div>')
+                        .attr('key', key)
+                        .attr('id', 'workers_row_' + key.replace(' ','-'))
+                        .addClass('workerRow');
+                $('<div>').addClass('row_key').text(name).appendTo(row);
 		var val = $('<div>').addClass('row_val').appendTo(row);
 		
 		$('<span>').text(num).appendTo(val);
@@ -431,14 +507,14 @@ var Outside = {
 		
 		$('<div>').addClass('clear').appendTo(row);
 		
-		var tooltip = $('<div>').addClass('tooltip bottom right').appendTo(row);
-		var income = Outside._INCOME[key];
-		for(var s in income.stores) {
-			var r = $('<div>').addClass('storeRow');
-			$('<div>').addClass('row_key').text(_(s)).appendTo(r);
-			$('<div>').addClass('row_val').text(Engine.getIncomeMsg(income.stores[s], income.delay)).appendTo(r);
-			r.appendTo(tooltip);
-		}
+                var tooltip = $('<div>').addClass('tooltip bottom right').appendTo(row);
+                var income = Outside._INCOME[key];
+                for(var s in income.stores) {
+                        var r = $('<div>').addClass('storeRow');
+                        $('<div>').addClass('row_key').text(Room.getResourceLabel(s)).appendTo(r);
+                        $('<div>').addClass('row_val').text(Engine.getIncomeMsg(income.stores[s], income.delay)).appendTo(r);
+                        r.appendTo(tooltip);
+                }
 		
 		return row;
 	},
@@ -462,8 +538,8 @@ var Outside = {
 	},
 	
 	updateVillageRow: function(name, num, village) {
-		var id = 'building_row_' + name.replace(' ', '-');
-		var lname = _(name);
+                var id = 'building_row_' + name.replace(' ', '-');
+                var lname = Room.getDisplayName(name);
 		var row = $('div#' + id, village);
 		if(row.length === 0 && num > 0) {
 			row = $('<div>').attr('id', id).addClass('storeRow');
@@ -485,8 +561,9 @@ var Outside = {
 			} else {
 				row.insertAfter('#' + curPrev);
 			}
-		} else if(num > 0) {
-			$('div#' + row.attr('id') + ' > div.row_val', village).text(num);
+                } else if(num > 0) {
+                        $('div#' + row.attr('id') + ' > div.row_key', village).text(lname);
+                        $('div#' + row.attr('id') + ' > div.row_val', village).text(num);
 		} else if(num === 0) {
 			row.remove();
 		}
@@ -759,7 +836,7 @@ var Outside = {
 	},
 	
 	gatherWood: function() {
-		Notifications.notify(Outside, _("dry brush and dead branches litter the forest floor"));
+                Notifications.notify(Outside, Outside.getGatherMessage());
 		var gatherAmt = $SM.get('game.buildings["cart"]', true) > 0 ? 50 : 10;
 		$SM.add('stores.wood', gatherAmt);
 		AudioEngine.playSound(AudioLibrary.GATHER_WOOD);
