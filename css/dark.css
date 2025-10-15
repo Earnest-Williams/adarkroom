@@ -1,199 +1,73 @@
 body {
-	background-color: #272823;
-	color: #EEE;
+        --scene-room-bg: #272823;
+        --scene-room-bg-secondary: #0f0f0c;
+        --scene-room-glow: rgba(196, 176, 132, 0.28);
+        --scene-outside-bg: #1a231e;
+        --scene-outside-bg-secondary: #0a100d;
+        --scene-outside-glow: rgba(132, 179, 144, 0.25);
+        --scene-path-bg: #23231b;
+        --scene-path-bg-secondary: #0d0d09;
+        --scene-path-glow: rgba(210, 189, 128, 0.22);
+        --scene-world-bg: #1f1f18;
+        --scene-world-bg-secondary: #0b0b07;
+        --scene-world-glow: rgba(214, 200, 143, 0.18);
+        --scene-ship-bg: #1a2025;
+        --scene-ship-bg-secondary: #0a0d10;
+        --scene-ship-glow: rgba(148, 184, 220, 0.22);
+        --scene-space-bg: #080d1c;
+        --scene-space-bg-secondary: #03060f;
+        --scene-space-glow: rgba(134, 167, 221, 0.32);
+        --scene-fabricator-bg: #1c2125;
+        --scene-fabricator-bg-secondary: #080b0e;
+        --scene-fabricator-glow: rgba(148, 222, 255, 0.22);
+        --theme-accent: #d6c782;
+        --theme-accent-strong: #f4e8a7;
+        --theme-accent-soft: rgba(214, 199, 130, 0.35);
+        --surface-bg: rgba(39, 40, 35, 0.92);
+        --surface-border: rgba(238, 238, 224, 0.28);
+        --surface-border-strong: rgba(238, 238, 224, 0.65);
+        --surface-shadow: rgba(5, 5, 5, 0.7);
+        --text-primary: #f0f0ed;
+        --text-secondary: rgba(240, 240, 237, 0.75);
+        --text-invert: #10100c;
+        --disabled-surface: rgba(110, 110, 96, 0.55);
+        --disabled-text: rgba(240, 240, 237, 0.35);
+        --status-bg: rgba(0, 0, 0, 0.45);
 }
 
-div.headerButton {
-	border-left: 1px solid #EEE;
-}
-
-div#notifyGradient {
-	background-color: #272823;
-	background: -webkit-linear-gradient( rgba(39, 40, 35, 0) 0%, rgba(39, 40, 35, 1) 100% );
-	background: linear-gradient( rgba(39, 40, 35, 0) 0%, rgba(39, 40, 35, 1) 100% );
-	filter: alpha( Opacity=0, FinishOpacity=100, Style=1, StartX=0, StartY=0, FinishX=0, FinishY=500 );
-}
-
-div#saveNotify {
-	background: #272823;
-}
-
-.eventPanel:before {
-	background-color: #272823;
-}
-
-.eventTitle:after {
-	background-color: #272823;
-}
-
-div.tooltip {
-	background-color: #171813;
-	border: 1px solid black;
-	box-shadow: -1px 3px 2px #111;
-}
-
-div#population {
-	background-color: #272823;
-}
-
-div#village:before {
-	background: #272823;
-}
-
-div#village {
-	border: 1px solid #EEE;
-}
-
-div#stores:before {
-	background: #272823;
-}
-
-div#stores {
-	border: 1px solid #EEE;
-}
-
-div#blueprints:before {
-	background: #272823;
-}
-
-div#blueprints {
-	border: 1px solid #EEE;
-}
-
-div#weapons:before {
-	background: #272823;
-}
-
-div#weapons {
-	border: 1px solid #EEE;
-}
-
-div#bagspace {
-	background-color: #272823;
-}
-
-div#outfitting:before {
-	background: #272823;
-}
-
-div#perks {
-	border: 1px solid #EEE;
-}
-
-div#perks:before {
-	background-color: #272823;
-}
-
-div#outfitting {
-	border: 1px solid #EEE;
-}
-
-#bagspace-world {
-	border: 1px solid #EEE;
-}
-
-div.supplyItem {
-	border: 1px solid #EEE;
-}
-
-#backpackTitle {
-	background-color: #272823;
-}
-
-#backpackSpace {
-	background-color: #272823;
-}
-
-#healthCounter {
-	background-color: #272823;
-}
-
-#map {
-	border: 1px solid #EEE;
-}
-
-#map .landmark {
-	color: #EEE;
-}
-
-#dropMenu {
-	background: none repeat scroll 0 0 #272823;
-	box-shadow: -1px 3px 2px #111;
-}
-
-div.button {
-	border: 1px solid #EEE;
-}
-
-div.button.disabled, div.button.disabled:hover {
-	border-color: #444;
-	color: #444;
-}
-
-
-.upBtn:after, .upManyBtn:after {
-	border-color: transparent transparent #272823;
-}
-
-.upBtn:before, .upManyBtn:before {
-	border-color: transparent transparent #EEE;
-}
-
-.upBtn.disabled:before, .upManyBtn.disabled:before {
-	border-color: transparent transparent #555;
-}
-
-.dnBtn:after, .dnManyBtn:after {
-	border-color: #272823 transparent transparent;
-}
-
-.dnBtn:before, .dnManyBtn:before {
-	border-color: #EEE transparent transparent;
-}
-
-.dnBtn.disabled:before, .dnManyBtn.disabled:before {
-	border-color: #555 transparent transparent;
-}
-
-body.noMask .eventTitle {
-	background-color: #EEE;
-	color: #272823;
-}
-
-body.noMask .eventTitle:after {
-	background-color: #EEE;
-}
-
-body.noMask .eventPanel {
-	background-color: #EEE;
-}
-
-body.noMask #description {
-	color: #272823;
-}
-
-body.noMask #buttons > .button {
-	border: 1px solid #272823;
-	color: #272823;
-}
-
-#stars > div, #starsBack > div {
-	color: black;
-}
-
-.endGame, .outro {
-	color:#272823;
-}
-
-#wait-btn {
-	border-color: black;
-	color: black;
-}
-
-#theEnd {
-	color: #272823;
-}
-
-.logo-icon > path {
-  stroke: white;
+body.theme-magic {
+        --scene-room-bg: #2c223a;
+        --scene-room-bg-secondary: #0f0b19;
+        --scene-room-glow: rgba(180, 139, 255, 0.32);
+        --scene-outside-bg: #1a2f32;
+        --scene-outside-bg-secondary: #091316;
+        --scene-outside-glow: rgba(120, 212, 222, 0.3);
+        --scene-path-bg: #27243f;
+        --scene-path-bg-secondary: #0b0a18;
+        --scene-path-glow: rgba(202, 146, 255, 0.3);
+        --scene-world-bg: #22263a;
+        --scene-world-bg-secondary: #080a15;
+        --scene-world-glow: rgba(160, 204, 255, 0.26);
+        --scene-ship-bg: #1e2739;
+        --scene-ship-bg-secondary: #0a0d18;
+        --scene-ship-glow: rgba(142, 196, 255, 0.28);
+        --scene-space-bg: #0a1032;
+        --scene-space-bg-secondary: #05091c;
+        --scene-space-glow: rgba(168, 180, 255, 0.38);
+        --scene-fabricator-bg: #1f2740;
+        --scene-fabricator-bg-secondary: #080b18;
+        --scene-fabricator-glow: rgba(144, 224, 255, 0.3);
+        --theme-accent: #cbb3ff;
+        --theme-accent-strong: #e3d6ff;
+        --theme-accent-soft: rgba(203, 179, 255, 0.35);
+        --surface-bg: rgba(39, 32, 55, 0.9);
+        --surface-border: rgba(218, 196, 255, 0.35);
+        --surface-border-strong: rgba(218, 196, 255, 0.7);
+        --surface-shadow: rgba(4, 4, 12, 0.65);
+        --text-primary: #f1edff;
+        --text-secondary: rgba(241, 237, 255, 0.72);
+        --text-invert: #120f1b;
+        --disabled-surface: rgba(85, 75, 120, 0.55);
+        --disabled-text: rgba(241, 237, 255, 0.4);
+        --status-bg: rgba(8, 8, 20, 0.5);
 }

@@ -2,6 +2,7 @@
  * Module that registers the outdoors functionality
  */
 var Outside = {
+        scene: 'outside',
         name: _("Outside"),
         options: {
                 startVariant: 'default'

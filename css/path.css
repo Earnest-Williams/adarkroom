@@ -1,16 +1,25 @@
 #outfitting {
-	position: relative;
-	border: 1px solid black;
-	width: 200px;
-	margin-bottom: 20px;
-	padding: 5px 10px;
+        position: relative;
+        border: 1px solid var(--surface-border-strong);
+        width: 200px;
+        margin-bottom: 20px;
+        padding: 5px 10px;
+        background: rgba(0, 0, 0, 0.35);
+        border-radius: 14px;
+        box-shadow: 0 18px 35px rgba(0, 0, 0, 0.45);
+        color: var(--text-primary);
 }
 
 div#outfitting:before, div#perks:before {
-	content: attr(data-legend);
-	position: absolute;
-	top: -13px;
-	background-color: white;
+        content: attr(data-legend);
+        position: absolute;
+        top: -13px;
+        background-color: var(--surface-bg);
+        color: var(--text-secondary);
+        padding: 0 8px;
+        border-radius: 10px;
+        border: 1px solid var(--surface-border);
+        box-shadow: 0 8px 18px rgba(0, 0, 0, 0.35);
 }
 
 div.outfitRow {
@@ -34,20 +43,29 @@ div.outfitRow .tooltip {
 }
 
 div#bagspace {
-	background-color: white;
-	position: absolute;
-	top:-13px;
-	right: 10px;
+        background-color: var(--surface-bg);
+        position: absolute;
+        top:-13px;
+        right: 10px;
+        color: var(--text-secondary);
+        padding: 0 8px;
+        border-radius: 10px;
+        border: 1px solid var(--surface-border);
+        box-shadow: 0 8px 18px rgba(0, 0, 0, 0.35);
 }
 
 div#perks {
-	position: absolute;
-	top: 0px;
-	right: 0px;
-	border: 1px solid black;
-	cursor: default;
-	padding: 5px 10px;
-	width: 200px;
+        position: absolute;
+        top: 0px;
+        right: 0px;
+        border: 1px solid var(--surface-border-strong);
+        cursor: default;
+        padding: 5px 10px;
+        width: 200px;
+        background: rgba(0, 0, 0, 0.35);
+        border-radius: 14px;
+        box-shadow: 0 18px 35px rgba(0, 0, 0, 0.45);
+        color: var(--text-primary);
 }
 
 div.perkRow {
