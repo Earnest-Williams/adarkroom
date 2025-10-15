@@ -377,7 +377,7 @@ export class Scheduler {
       return { changed: false, previousKind, nextKind: weather.kind };
     }
 
-    const rng = createRng(weather.seed || 1);
+    const rng = createRng(weather.seed ?? 1);
     const season = meta.time.season;
     const nextKind = pickWeatherKind(previousKind, season, rng, this.weatherConfig);
     const intensity = resolveWeatherIntensity(nextKind, rng, this.weatherConfig);
