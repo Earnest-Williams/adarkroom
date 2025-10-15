@@ -1,7 +1,7 @@
 import { promises as fsPromises } from "fs";
 import type { Dirent } from "fs";
 import { join, relative, resolve } from "path";
-import type { ContentManifest, EventDef, LoadedEvent } from "./schema";
+import type { ContentManifest, EventDef, LoadedEvent } from "./schema.js";
 
 export interface LoaderFileSystem {
   readdir(path: string, options: { withFileTypes: true }): Promise<Dirent[]>;

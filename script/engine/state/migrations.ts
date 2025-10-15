@@ -6,7 +6,7 @@ import {
   WEATHER_KINDS,
   defaultMeta,
   defaultRootState,
-} from "../../../types/state";
+} from "../../../types/state.js";
 
 function isPlainObject(value: unknown): value is Record<string, unknown> {
   return (

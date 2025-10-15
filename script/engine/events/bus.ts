@@ -1,4 +1,4 @@
-import type { Season, TimeOfDay, WeatherKind } from "../../../types/state";
+import type { Season, TimeOfDay, WeatherKind } from "../../../types/state.js";
 
 export type Listener<T> = (payload: T) => void;
 

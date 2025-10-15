@@ -1,7 +1,7 @@
-import { bus } from "./events/bus";
-import { StateManager } from "./state/StateManager";
-import type { MetaFlags, Season, TimeOfDay, WeatherKind } from "../../types/state";
-import { SEASONS, WEATHER_KINDS } from "../../types/state";
+import { bus } from "./events/bus.js";
+import { StateManager } from "./state/StateManager.js";
+import type { MetaFlags, Season, TimeOfDay, WeatherKind } from "../../types/state.js";
+import { SEASONS, WEATHER_KINDS } from "../../types/state.js";
 
 export interface SchedulerOptions {
   tickMs: number;
