@@ -326,6 +326,11 @@ export class ContentRunner {
   }
 
   private incrementPath(target: Record<string, unknown>, path: string, amount: number): void {
+    const numericAmount = Number(amount);
+    if (!Number.isFinite(numericAmount)) {
+      return;
+    }
+
     const segments = path.split(".").filter(Boolean);
     if (segments.length === 0) {
       return;
@@ -342,7 +347,8 @@ export class ContentRunner {
     }
 
     const currentValue = Number(cursor[last] ?? 0);
-    const nextValue = Number.isFinite(currentValue) ? currentValue + amount : amount;
+    const baseValue = Number.isFinite(currentValue) ? currentValue : 0;
+    const nextValue = baseValue + numericAmount;
     cursor[last] = nextValue;
   }
 
