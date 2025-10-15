@@ -104,6 +104,10 @@
         Engine.loadGame();
       }
 
+      if(typeof TimeWeather !== 'undefined' && TimeWeather && typeof TimeWeather.init === 'function') {
+        TimeWeather.init();
+      }
+
       // start loading music and events early
       for (var key in AudioLibrary) {
         if (

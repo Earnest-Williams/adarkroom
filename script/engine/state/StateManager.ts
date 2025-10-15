@@ -1,5 +1,5 @@
-import { RootState, defaultRootState } from "../../../types/state";
-import { applyMigrations } from "./migrations";
+import { RootState, defaultRootState } from "../../../types/state.js";
+import { applyMigrations } from "./migrations.js";
 
 type Listener = (state: RootState) => void;
 

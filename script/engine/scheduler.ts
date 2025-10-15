@@ -1,11 +1,12 @@
-import { bus } from "./events/bus";
-import { StateManager } from "./state/StateManager";
-import type { MetaFlags, Season, TimeOfDay, WeatherKind } from "../../types/state";
-import { SEASONS, WEATHER_KINDS } from "../../types/state";
+import { bus } from "./events/bus.js";
+import { StateManager } from "./state/StateManager.js";
+import type { MetaFlags, Season, TimeOfDay, WeatherKind } from "../../types/state.js";
+import { SEASONS, TIMES_OF_DAY, WEATHER_KINDS } from "../../types/state.js";
 
 export interface SchedulerOptions {
   tickMs: number;
   catchUpCap: number;
+  config?: SchedulerConfig;
 }
 
 interface AdvanceTimeResult {
@@ -33,6 +34,97 @@ const DEFAULT_OPTIONS: SchedulerOptions = {
 const MINUTES_PER_TICK = 1;
 const DAYS_PER_SEASON = 30;
 
+type RawTimeRange = {
+  slice?: string;
+  startHour?: number;
+  endHour?: number;
+};
+
+type WeatherTransitionWeights = Record<string, number>;
+
+type WeatherTransitionTable = Record<string, WeatherTransitionWeights>;
+
+interface WeatherConfigSchema {
+  durations?: Partial<Record<WeatherKind, [number, number]>>;
+  intensity?: Partial<Record<WeatherKind, [number, number]>>;
+  transitions?: Record<string, WeatherTransitionTable>;
+}
+
+interface TimeRange {
+  slice: TimeOfDay;
+  startHour: number;
+  endHour: number;
+}
+
+export interface SchedulerConfig {
+  timeOfDay?: RawTimeRange[];
+  weather?: WeatherConfigSchema;
+}
+
+interface NormalizedWeatherConfig {
+  durations: Partial<Record<WeatherKind, [number, number]>>;
+  intensity: Partial<Record<WeatherKind, [number, number]>>;
+  transitions: Record<string, WeatherTransitionTable>;
+}
+
+const DEFAULT_TIME_RANGES: readonly TimeRange[] = [
+  { slice: "dawn", startHour: 5, endHour: 6 },
+  { slice: "day", startHour: 7, endHour: 18 },
+  { slice: "dusk", startHour: 19, endHour: 20 },
+  { slice: "night", startHour: 21, endHour: 4 },
+];
+
+function clampHour(value: number | undefined): number {
+  const numeric = Number.isFinite(value) ? Math.floor(value as number) : 0;
+  const normalized = numeric % 24;
+  return normalized < 0 ? normalized + 24 : normalized;
+}
+
+function isHourWithinRange(hour: number, range: TimeRange): boolean {
+  const start = clampHour(range.startHour);
+  const end = clampHour(range.endHour);
+  if (start === end) {
+    return hour === start;
+  }
+  if (start < end) {
+    return hour >= start && hour <= end;
+  }
+  return hour >= start || hour <= end;
+}
+
+function normalizeTimeRanges(raw?: RawTimeRange[]): readonly TimeRange[] {
+  const configured = (raw ?? [])
+    .map<TimeRange | undefined>((range) => {
+      const slice = typeof range.slice === "string" ? (range.slice as TimeOfDay) : undefined;
+      if (!slice || !TIMES_OF_DAY.includes(slice)) {
+        return undefined;
+      }
+      const startHour = clampHour(range.startHour);
+      const endHour = clampHour(range.endHour ?? range.startHour);
+      return { slice, startHour, endHour };
+    })
+    .filter((range): range is TimeRange => Boolean(range));
+
+  return configured.length > 0 ? configured : DEFAULT_TIME_RANGES;
+}
+
+const EMPTY_WEATHER_CONFIG: NormalizedWeatherConfig = {
+  durations: {},
+  intensity: {},
+  transitions: {},
+};
+
+function normalizeWeatherConfig(config?: WeatherConfigSchema): NormalizedWeatherConfig {
+  if (!config) {
+    return { ...EMPTY_WEATHER_CONFIG };
+  }
+  return {
+    durations: config.durations ?? {},
+    intensity: config.intensity ?? {},
+    transitions: config.transitions ? { ...config.transitions } : {},
+  };
+}
+
 function now(): number {
   if (typeof performance !== "undefined" && typeof performance.now === "function") {
     return performance.now();
@@ -55,23 +147,82 @@ function clamp(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value));
 }
 
-function resolveTimeSlice(hour: number, minute: number): TimeOfDay {
-  const totalMinutes = hour * 60 + minute;
-  if (totalMinutes >= 300 && totalMinutes < 420) {
-    return "dawn";
+function resolveTimeSlice(hour: number, minute: number, ranges: readonly TimeRange[]): TimeOfDay {
+  const normalizedHour = clampHour(hour);
+  for (const range of ranges) {
+    if (isHourWithinRange(normalizedHour, range)) {
+      return range.slice;
+    }
   }
-  if (totalMinutes >= 420 && totalMinutes < 1080) {
-    return "day";
+  return ranges[0]?.slice ?? "dawn";
+}
+
+function resolveWeatherDuration(kind: WeatherKind, rng: () => number, config: NormalizedWeatherConfig): number {
+  const range = config.durations?.[kind];
+  const min = Math.max(1, Math.floor((range && range[0]) ?? 6));
+  const max = Math.max(min, Math.floor((range && range[1]) ?? 24));
+  const span = max - min + 1;
+  return min + Math.floor(rng() * span);
+}
+
+function resolveWeatherIntensity(kind: WeatherKind, rng: () => number, config: NormalizedWeatherConfig): number {
+  const range = config.intensity?.[kind];
+  if (!range || range.length !== 2) {
+    return clamp(rng(), 0, 1);
   }
-  if (totalMinutes >= 1080 && totalMinutes < 1260) {
-    return "dusk";
+  const min = clamp(range[0] ?? 0, 0, 1);
+  const max = clamp(range[1] ?? min, min, 1);
+  if (max <= min) {
+    return min;
   }
-  return "night";
+  return min + rng() * (max - min);
+}
+
+function pickWeatherKind(
+  current: WeatherKind,
+  season: Season,
+  rng: () => number,
+  config: NormalizedWeatherConfig,
+): WeatherKind {
+  const transitions = config.transitions;
+  if (!transitions) {
+    return WEATHER_KINDS[Math.floor(rng() * WEATHER_KINDS.length)];
+  }
+
+  const seasonTable = transitions[season] ?? transitions.default ?? {};
+  const weights =
+    seasonTable[current] ??
+    seasonTable.default ??
+    transitions.default?.[current] ??
+    transitions.default?.default ??
+    {};
+
+  const entries = Object.entries(weights).filter(([, weight]) => typeof weight === "number" && weight > 0);
+  if (entries.length === 0) {
+    return WEATHER_KINDS[Math.floor(rng() * WEATHER_KINDS.length)];
+  }
+
+  const total = entries.reduce((sum, [, weight]) => sum + weight, 0);
+  let roll = rng() * total;
+  for (const [kind, weight] of entries) {
+    roll -= weight;
+    if (roll <= 0) {
+      if (WEATHER_KINDS.includes(kind as WeatherKind)) {
+        return kind as WeatherKind;
+      }
+      break;
+    }
+  }
+
+  const fallback = entries[entries.length - 1][0];
+  return WEATHER_KINDS.includes(fallback as WeatherKind) ? (fallback as WeatherKind) : current;
 }
 
 export class Scheduler {
   private readonly options: SchedulerOptions;
   private readonly stateManager: StateManager;
+  private readonly timeRanges: readonly TimeRange[];
+  private readonly weatherConfig: NormalizedWeatherConfig;
   private timer: TimerHandle = null;
   private running = false;
   private lastTimestamp = 0;
@@ -81,8 +232,11 @@ export class Scheduler {
 
   constructor(opts: SchedulerOptions, stateManager: StateManager);
   constructor(opts: SchedulerOptions, stateManager: StateManager) {
-    this.options = { ...DEFAULT_OPTIONS, ...opts };
+    const { config, ...rest } = opts;
+    this.options = { ...DEFAULT_OPTIONS, ...rest };
     this.stateManager = stateManager;
+    this.timeRanges = normalizeTimeRanges(config?.timeOfDay);
+    this.weatherConfig = normalizeWeatherConfig(config?.weather);
   }
 
   start(): void {
@@ -187,7 +341,7 @@ export class Scheduler {
       meta.time.day = day;
     }
 
-    const newSlice = resolveTimeSlice(hour, minute);
+    const newSlice = resolveTimeSlice(hour, minute, this.timeRanges);
     if (newSlice !== meta.time.tod) {
       result.timeSliceChanged = true;
       result.previousTimeSlice = meta.time.tod;
@@ -224,9 +378,10 @@ export class Scheduler {
     }
 
     const rng = createRng(weather.seed || 1);
-    const nextKind = WEATHER_KINDS[Math.floor(rng() * WEATHER_KINDS.length)];
-    const intensity = clamp(rng(), 0, 1);
-    const duration = Math.max(6, Math.floor(rng() * 48));
+    const season = meta.time.season;
+    const nextKind = pickWeatherKind(previousKind, season, rng, this.weatherConfig);
+    const intensity = resolveWeatherIntensity(nextKind, rng, this.weatherConfig);
+    const duration = resolveWeatherDuration(nextKind, rng, this.weatherConfig);
     const newSeed = Math.floor(rng() * 0xffffffff);
 
     weather.kind = nextKind;

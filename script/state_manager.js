@@ -349,10 +349,13 @@ var StateManager = {
 	},
 
 	collectIncome: function() {
+		if(typeof TimeWeather !== 'undefined' && TimeWeather && typeof TimeWeather.tick === 'function') {
+			TimeWeather.tick();
+		}
 		var changed = false;
-		if(typeof $SM.get('income') != 'undefined' && Engine.activeModule != Space) {
-			for(var source in $SM.get('income')) {
-				var income = $SM.get('income["'+source+'"]');
+                if(typeof $SM.get('income') != 'undefined' && Engine.activeModule != Space) {
+                        for(var source in $SM.get('income')) {
+                                var income = $SM.get('income["'+source+'"]');
 				if(typeof income.timeLeft != 'number')
 				{
 					income.timeLeft = 0;
@@ -363,21 +366,25 @@ var StateManager = {
 					Engine.log('collection income from ' + source);
 					if(source == 'thieves') $SM.addStolen(income.stores);
 
-					var cost = income.stores;
-					var ok = true;
-					if (source != 'thieves') {
-						for (var k in cost) {
-							var have = $SM.get('stores["' + k + '"]', true);
-							if (have + cost[k] < 0) {
+				var storesDelta = income.stores;
+				if(source != 'thieves' && typeof TimeWeather !== 'undefined' && TimeWeather && typeof TimeWeather.applyIncomeModifiers === 'function') {
+					storesDelta = TimeWeather.applyIncomeModifiers(source, storesDelta);
+				}
+				var cost = storesDelta;
+                                        var ok = true;
+                                        if (source != 'thieves') {
+                                                for (var k in cost) {
+                                                        var have = $SM.get('stores["' + k + '"]', true);
+                                                        if (have + cost[k] < 0) {
 								ok = false;
 								break;
 							}
 						}
 					}
 
-					if(ok){
-						$SM.addM('stores', income.stores, true);
-					}
+                                        if(ok){
+                                                $SM.addM('stores', cost, true);
+                                        }
 					changed = true;
 					if(typeof income.delay == 'number') {
 						income.timeLeft = income.delay;
