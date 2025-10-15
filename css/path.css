@@ -2,9 +2,11 @@
         position: relative;
         border: 1px solid var(--surface-border-strong);
         width: 200px;
+        box-sizing: border-box;
         margin-bottom: 20px;
-        padding: 5px 10px;
-        background: rgba(0, 0, 0, 0.35);
+        padding: 16px 16px 14px;
+        background-color: var(--surface-bg);
+        background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.02) 0%, rgba(0, 0, 0, 0.35) 100%);
         border-radius: 14px;
         box-shadow: 0 18px 35px rgba(0, 0, 0, 0.45);
         color: var(--text-primary);
@@ -60,9 +62,11 @@ div#perks {
         right: 0px;
         border: 1px solid var(--surface-border-strong);
         cursor: default;
-        padding: 5px 10px;
+        padding: 16px 16px 14px;
         width: 200px;
-        background: rgba(0, 0, 0, 0.35);
+        box-sizing: border-box;
+        background-color: var(--surface-bg);
+        background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.02) 0%, rgba(0, 0, 0, 0.35) 100%);
         border-radius: 14px;
         box-shadow: 0 18px 35px rgba(0, 0, 0, 0.45);
         color: var(--text-primary);
