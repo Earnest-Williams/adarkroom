@@ -83,4 +83,37 @@ describe("ContentRunner", () => {
     }
     assert.ok(caught instanceof Error);
   });
+
+  it("coerces numeric effect amounts when applying resource effects", () => {
+    const manager = new StateManager(defaultRootState());
+    const runner = new ContentRunner(manager);
+
+    runner.register({
+      id: "event:coerce", 
+      category: "Room",
+      nodes: [
+        {
+          id: "start",
+          bodyKey: "start",
+          choices: [
+            {
+              id: "apply",
+              textKey: "apply",
+              effects: [
+                { kind: "resource", key: "wood", amount: "2" as unknown as number },
+                { kind: "resource", key: "store.materials.ore", amount: "3" as unknown as number },
+              ],
+            },
+          ],
+        },
+      ],
+    });
+
+    const session = runner.start("event:coerce");
+    runner.choose(session, "apply");
+
+    const state = manager.getState();
+    assert.equal(state.store.wood, 2);
+    assert.equal((state.store.materials as { ore: number }).ore, 3);
+  });
 });
