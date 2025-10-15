@@ -9,6 +9,7 @@ var Room = {
 	_STOKE_COOLDOWN: 10, // cooldown to stoke the fire
 	_NEED_WOOD_DELAY: 15 * 1000, // from when the stranger shows up, to when you need wood
 	buttons: {},
+	startVariantPrepared: false,
 	Craftables: {
 		'trap': {
 			name: _('trap'),
@@ -498,6 +499,9 @@ var Room = {
 		);
 
 		Room.pathDiscovery = Boolean($SM.get('stores["compass"]'));
+		Room.startVariantPrepared = Boolean($SM.get('game.magicPathPrepared'));
+		var startVariant = Room.getStartVariant();
+		Room.ensureStartVariantPreparation(startVariant);
 
 		if (Engine._debug) {
 			this._ROOM_WARM_DELAY = 5000;
@@ -546,6 +550,15 @@ var Room = {
 			width: '80px',
 			cost: { 'wood': 1 }
 		}).appendTo('div#roomPanel');
+
+		var sleepButton = new Button.Button({
+			id: 'sleepButton',
+			text: _('sleep'),
+			click: Room.sleep,
+			width: '80px'
+		}).appendTo('div#roomPanel');
+		sleepButton.hide();
+		Button.setDisabled(sleepButton, true);
 
 		// Create the stores container
 		$('<div>').attr('id', 'storesContainer').prependTo('div#roomPanel');
@@ -601,8 +614,10 @@ var Room = {
 		}
 
 		Engine.moveStoresView(null, transition_diff);
-		
+
 		Room.setMusic();
+		Room.ensureStartVariantPreparation();
+		Room.updateButton();
 	},
 
 	TempEnum: {
@@ -645,10 +660,61 @@ var Room = {
 		$('div#location_room').text(title);
 	},
 
+	getStartVariant: function () {
+		var variant = $SM.get('game.startVariant');
+		if (variant === undefined || variant === null || variant === '') {
+			variant = 'default';
+			$SM.set('game.startVariant', variant);
+		}
+		return variant;
+	},
+
+	setStartVariant: function (variant) {
+		var current = Room.getStartVariant();
+		if (current === variant) {
+			return;
+		}
+		$SM.set('game.startVariant', variant);
+	},
+
+	ensureStartVariantPreparation: function (variant) {
+		var currentVariant = variant || Room.getStartVariant();
+		if (currentVariant === 'magic' && !Room.startVariantPrepared) {
+			Room.prepareMagicalPath();
+		}
+	},
+
+	prepareMagicalPath: function () {
+		if (Room.startVariantPrepared) {
+			return;
+		}
+		Room.startVariantPrepared = true;
+		$SM.set('game.magicPathPrepared', true);
+		if (typeof Path !== 'undefined' && typeof Path.prepareMagicPath === 'function') {
+			Path.prepareMagicPath();
+		}
+		Room.updateButton();
+	},
+
 	updateButton: function () {
 		var light = $('#lightButton.button');
 		var stoke = $('#stokeButton.button');
-		if ($SM.get('game.fire.value') == Room.FireEnum.Dead.value && stoke.css('display') != 'none') {
+		var sleep = $('#sleepButton.button');
+		var fireIsDead = $SM.get('game.fire.value') == Room.FireEnum.Dead.value;
+		var startVariant = Room.getStartVariant();
+		var shouldShowSleep = fireIsDead && startVariant === 'default' && !Room.startVariantPrepared;
+
+		if (sleep.length) {
+			if (shouldShowSleep) {
+				sleep.show();
+				Button.setDisabled(sleep, false);
+			} else {
+				Button.setDisabled(sleep, true);
+				sleep.hide();
+			}
+		}
+
+		if (fireIsDead && stoke.css('display') != 'none') {
 			stoke.hide();
 			light.show();
 			if (stoke.hasClass('disabled')) {
@@ -670,9 +736,23 @@ var Room = {
 			stoke.removeClass('free');
 		}
 	},
-
 	_fireTimer: null,
 	_tempTimer: null,
+	sleep: function () {
+		var sleepBtn = $('#sleepButton.button');
+		if (!sleepBtn.length) {
+			return;
+		}
+		if ($SM.get('game.fire.value') != Room.FireEnum.Dead.value) {
+			return;
+		}
+		if (Room.getStartVariant() !== 'default' || Room.startVariantPrepared) {
+			return;
+		}
+		Button.setDisabled(sleepBtn, true);
+		sleepBtn.hide();
+		Events.startEvent(Events.RoomMagicDream);
+	},
 	lightFire: function () {
 		var wood = $SM.get('stores.wood');
 		if (wood < 5) {
@@ -831,7 +911,7 @@ var Room = {
 				continue;
 			}
 
-			const good =  
+			const good =
         Room.Craftables[k] ||
         Room.TradeGoods[k] ||
         Room.TradeGoods[k] ||
@@ -1232,6 +1312,12 @@ var Room = {
 			Room.updateIncomeView();
 		} else if (e.stateName.indexOf('game.buildings') === 0) {
 			Room.updateBuildButtons();
+		} else if (e.stateName === 'game.startVariant') {
+			Room.ensureStartVariantPreparation();
+			Room.updateButton();
+		} else if (e.stateName === 'game.magicPathPrepared') {
+			Room.startVariantPrepared = Boolean($SM.get('game.magicPathPrepared'));
+			Room.updateButton();
 		}
 	},
 
