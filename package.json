@@ -16,6 +16,6 @@
     "i18n:extract": "npm run build --silent && node build/script/i18n/extract.js"
   },
   "dependencies": {
-    "express": "^4.19.2"
+    "express": "^4.21.2"
   }
 }
