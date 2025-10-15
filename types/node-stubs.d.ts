@@ -17,3 +17,31 @@ declare module "node:assert/strict" {
   const assert: AssertionModule;
   export default assert;
 }
+
+declare module "fs" {
+  export type Dirent = {
+    name: string;
+    isDirectory(): boolean;
+    isFile(): boolean;
+  };
+
+  export const promises: {
+    readdir(path: string, options: { withFileTypes: true }): Promise<Dirent[]>;
+    readFile(path: string, encoding: string): Promise<string>;
+    writeFile(path: string, data: string, encoding: string): Promise<void>;
+    access(path: string): Promise<void>;
+    mkdir(path: string, options?: { recursive?: boolean }): Promise<void>;
+  };
+}
+
+declare module "path" {
+  export function join(...segments: string[]): string;
+  export function resolve(...segments: string[]): string;
+  export function relative(from: string, to: string): string;
+  export function dirname(path: string): string;
+}
+
+declare const process: {
+  cwd(): string;
+  exitCode?: number;
+};
