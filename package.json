@@ -12,7 +12,8 @@
     "build": "tsc --project tsconfig.json",
     "lint": "npm run build --silent && npx eslint \"build/**/*.js\"",
     "test": "npm run build --silent && node --test build/tests/**/*.test.js",
-    "clean": "rm -rf build"
+    "clean": "rm -rf build",
+    "i18n:extract": "npm run build --silent && node build/script/i18n/extract.js"
   },
   "dependencies": {
     "express": "^4.19.2"
