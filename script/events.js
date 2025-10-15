@@ -1275,26 +1275,29 @@ var Events = {
 		}
 
 		// Next Scene
-		if(info.nextScene) {
-			if(info.nextScene == 'end') {
-				Events.endEvent();
-			} else {
-				var r = Math.random();
-				var lowestMatch = null;
-				for(var i in info.nextScene) {
-					if(r < i && (lowestMatch == null || i < lowestMatch)) {
-						lowestMatch = i;
-					}
-				}
-				if(lowestMatch != null) {
-					Events.loadScene(info.nextScene[lowestMatch]);
-					return;
-				}
-				Engine.log('ERROR: no suitable scene found');
-				Events.endEvent();
-			}
-		}
-	},
+                if(info.nextScene) {
+                        if(info.nextScene == 'end') {
+                                Events.endEvent();
+                        } else if (typeof info.nextScene === 'string') {
+                                Events.loadScene(info.nextScene);
+                                return;
+                        } else {
+                                var r = Math.random();
+                                var lowestMatch = null;
+                                for(var i in info.nextScene) {
+                                        if(r < i && (lowestMatch == null || i < lowestMatch)) {
+                                                lowestMatch = i;
+                                        }
+                                }
+                                if(lowestMatch != null) {
+                                        Events.loadScene(info.nextScene[lowestMatch]);
+                                        return;
+                                }
+                                Engine.log('ERROR: no suitable scene found');
+                                Events.endEvent();
+                        }
+                }
+        },
 
 	// blinks the browser window title
 	blinkTitle: function() {
