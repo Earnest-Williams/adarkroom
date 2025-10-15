@@ -129,11 +129,17 @@ var Path = {
                 }
                 return _('A Dusty Path');
         },
+        syncWorldVariant: function (variant) {
+                if (typeof World !== 'undefined' && typeof World.setStartVariant === 'function') {
+                        World.setStartVariant(variant);
+                }
+        },
         applyStartVariantTheme: function (variant) {
                 var normalized = Path.resolveStartVariant(variant);
                 Path.startVariant = normalized;
                 Path.options = Path.options || {};
                 Path.options.startVariant = normalized;
+                Path.syncWorldVariant(normalized);
 
                 if (Path.tab && Path.tab.length) {
                         Path.tab.text(Path.getLocationLabel(normalized));
@@ -156,6 +162,12 @@ var Path = {
                 }
                 Path.init(options);
         },
+        prepareMagicPath: function () {
+                Path.syncWorldVariant('magic');
+                if (Path.panel && Path.panel.length) {
+                        Path.applyStartVariantTheme('magic');
+                }
+        },
         init: function(options) {
                 this.options = $.extend(
                         this.options,
@@ -165,6 +177,7 @@ var Path = {
                 var variant = Path.resolveStartVariant(this.options.startVariant);
                 Path.options.startVariant = variant;
                 Path.startVariant = variant;
+                Path.syncWorldVariant(variant);
 
                 // Init the World
                 World.init();

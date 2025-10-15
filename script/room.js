@@ -20,7 +20,18 @@ var Room = {
                                 weapons: _('weapons')
                         },
                         displayNames: {},
-                        craftables: {}
+                        craftables: {},
+                        builderMessages: {
+                                arrival: _('a ragged stranger stumbles through the door and collapses in the corner'),
+                                murmurs: _('the stranger shivers, and mumbles quietly. her words are unintelligible.'),
+                                calm: _('the stranger in the corner stops shivering. her breathing calms.'),
+                                helperReturn: _('the stranger is standing by the fire. she says she can help. says she builds things.')
+                        },
+                        unlockForestNotifications: [
+                                _('the wind howls outside'),
+                                _('the wood is running out')
+                        ],
+                        magicAwakeningMessage: null
                 },
                 magic: {
                         sectionLabels: {
@@ -191,7 +202,18 @@ var Room = {
                                         name: _('echo rifle'),
                                         buildMsg: _('an echo rifle, black powder bound with sigils')
                                 }
-                        }
+                        },
+                        builderMessages: {
+                                arrival: _('a cloaked wanderer staggers through the doorway, eyes burning with starlight.'),
+                                murmurs: _('the wanderer whispers cracked sigils between chattering teeth. sparks dance across the floor.'),
+                                calm: _('the wanderer exhales; faint wards bloom beneath her skin.'),
+                                helperReturn: _('the wanderer stands beside the fire\'s glow. she offers to weave whatever you need.')
+                        },
+                        unlockForestNotifications: [
+                                _('the wards outside thrum restlessly'),
+                                _('witchwood calls to be gathered')
+                        ],
+                        magicAwakeningMessage: _('the crystal\'s song lingers, sketching runes across the floorboards.')
                 }
         },
         getVariantData: function () {
@@ -263,8 +285,32 @@ var Room = {
                 return Room.getDisplayName(key);
         },
 
+        getBuilderMessage: function (key, fallback) {
+                var data = Room.getVariantData();
+                if (data.builderMessages && data.builderMessages[key]) {
+                        return data.builderMessages[key];
+                }
+                return fallback;
+        },
+
+        getUnlockForestNotifications: function (fallbackList) {
+                var data = Room.getVariantData();
+                if (data.unlockForestNotifications && data.unlockForestNotifications.length) {
+                        return data.unlockForestNotifications;
+                }
+                return fallbackList;
+        },
+
+        getMagicAwakeningMessage: function (fallback) {
+                var data = Room.getVariantData();
+                if (data.magicAwakeningMessage) {
+                        return data.magicAwakeningMessage;
+                }
+                return fallback || null;
+        },
+
         Craftables: {
-		'trap': {
+                'trap': {
 			name: _('trap'),
 			button: null,
 			maximum: 10,
@@ -856,15 +902,15 @@ var Room = {
 			Notifications.notify(Room, _("the room is {0}", Room.TempEnum.fromInt($SM.get('game.temperature.value')).text));
 			Room.changed = false;
 		}
-		if ($SM.get('game.builder.level') == 3) {
-			$SM.add('game.builder.level', 1);
-			$SM.setIncome('builder', {
-				delay: 10,
-				stores: { 'wood': 2 }
-			});
-			Room.updateIncomeView();
-			Notifications.notify(Room, _("the stranger is standing by the fire. she says she can help. says she builds things."));
-		}
+                if ($SM.get('game.builder.level') == 3) {
+                        $SM.add('game.builder.level', 1);
+                        $SM.setIncome('builder', {
+                                delay: 10,
+                                stores: { 'wood': 2 }
+                        });
+                        Room.updateIncomeView();
+                        Notifications.notify(Room, Room.getBuilderMessage('helperReturn', _("the stranger is standing by the fire. she says she can help. says she builds things.")));
+                }
 
 		Engine.moveStoresView(null, transition_diff);
 
@@ -941,13 +987,17 @@ var Room = {
 		if (Room.startVariantPrepared) {
 			return;
 		}
-		Room.startVariantPrepared = true;
-		$SM.set('game.magicPathPrepared', true);
-		if (typeof Path !== 'undefined' && typeof Path.prepareMagicPath === 'function') {
-			Path.prepareMagicPath();
-		}
-		Room.updateButton();
-	},
+                Room.startVariantPrepared = true;
+                $SM.set('game.magicPathPrepared', true);
+                if (typeof Path !== 'undefined' && typeof Path.prepareMagicPath === 'function') {
+                        Path.prepareMagicPath();
+                }
+                var awakeningMessage = Room.getMagicAwakeningMessage(null);
+                if (awakeningMessage) {
+                        Notifications.notify(Room, awakeningMessage);
+                }
+                Room.updateButton();
+        },
 
 	updateButton: function () {
 		var light = $('#lightButton.button');
@@ -1105,33 +1155,38 @@ var Room = {
                 } else {
                         Outside.init();
                 }
-                Notifications.notify(Room, _("the wind howls outside"));
-                Notifications.notify(Room, _("the wood is running out"));
+                var unlockMessages = Room.getUnlockForestNotifications([
+                        _("the wind howls outside"),
+                        _("the wood is running out")
+                ]);
+                for (var i = 0; i < unlockMessages.length; i++) {
+                        Notifications.notify(Room, unlockMessages[i]);
+                }
                 Engine.event('progress', 'outside');
         },
 
-	updateBuilderState: function () {
-		var lBuilder = $SM.get('game.builder.level');
-		if (lBuilder === 0) {
-			Notifications.notify(Room, _("a ragged stranger stumbles through the door and collapses in the corner"));
-			lBuilder = $SM.setget('game.builder.level', 1);
-			Engine.setTimeout(Room.unlockForest, Room._NEED_WOOD_DELAY);
-		}
-		else if (lBuilder < 3 && $SM.get('game.temperature.value') >= Room.TempEnum.Warm.value) {
-			var msg = "";
-			switch (lBuilder) {
-				case 1:
-					msg = _("the stranger shivers, and mumbles quietly. her words are unintelligible.");
-					break;
-				case 2:
-					msg = _("the stranger in the corner stops shivering. her breathing calms.");
-					break;
-			}
-			Notifications.notify(Room, msg);
-			if (lBuilder < 3) {
-				lBuilder = $SM.setget('game.builder.level', lBuilder + 1);
-			}
-		}
+        updateBuilderState: function () {
+                var lBuilder = $SM.get('game.builder.level');
+                if (lBuilder === 0) {
+                        Notifications.notify(Room, Room.getBuilderMessage('arrival', _("a ragged stranger stumbles through the door and collapses in the corner")));
+                        lBuilder = $SM.setget('game.builder.level', 1);
+                        Engine.setTimeout(Room.unlockForest, Room._NEED_WOOD_DELAY);
+                }
+                else if (lBuilder < 3 && $SM.get('game.temperature.value') >= Room.TempEnum.Warm.value) {
+                        var msg = "";
+                        switch (lBuilder) {
+                                case 1:
+                                        msg = Room.getBuilderMessage('murmurs', _("the stranger shivers, and mumbles quietly. her words are unintelligible."));
+                                        break;
+                                case 2:
+                                        msg = Room.getBuilderMessage('calm', _("the stranger in the corner stops shivering. her breathing calms."));
+                                        break;
+                        }
+                        Notifications.notify(Room, msg);
+                        if (lBuilder < 3) {
+                                lBuilder = $SM.setget('game.builder.level', lBuilder + 1);
+                        }
+                }
 		if (lBuilder < 3) {
 			Engine.setTimeout(Room.updateBuilderState, Room._BUILDER_STATE_DELAY);
 		}

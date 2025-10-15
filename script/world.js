@@ -42,6 +42,78 @@ var World = {
   WEST:  [-1,  0],
   EAST:  [ 1,  0],
 
+  themeVariants: {
+    default: {
+      worldTitle: _('A Barren World'),
+      baseWater: 10,
+      movesPerFood: 2,
+      movesPerWater: 1,
+      fightChance: 0.20,
+      meatHeal: 8,
+      arrivalMessage: null
+    },
+    magic: {
+      worldTitle: _('An Enchanted Wilderness'),
+      baseWater: 12,
+      movesPerFood: 3,
+      movesPerWater: 2,
+      fightChance: 0.17,
+      meatHeal: 10,
+      arrivalMessage: _('wisps of light spiral along the path, guiding your steps.')
+    }
+  },
+  startVariant: 'default',
+  resolveStartVariant: function (variant) {
+    return variant === 'magic' ? 'magic' : 'default';
+  },
+  setStartVariant: function (variant) {
+    var normalized = World.resolveStartVariant(variant);
+    if (World.startVariant === normalized) {
+      return;
+    }
+    World.startVariant = normalized;
+    World.applyStartVariantTheme();
+    if (typeof Engine !== 'undefined' && Engine.activeModule === World) {
+      World.setTitle();
+    }
+  },
+  getVariantData: function () {
+    return World.themeVariants[World.startVariant] || World.themeVariants.default;
+  },
+  getWorldTitle: function () {
+    var data = World.getVariantData();
+    return data.worldTitle || _('A Barren World');
+  },
+  getBaseWater: function () {
+    var data = World.getVariantData();
+    return typeof data.baseWater === 'number' ? data.baseWater : World.BASE_WATER;
+  },
+  getMovesPerFood: function () {
+    var data = World.getVariantData();
+    return typeof data.movesPerFood === 'number' ? data.movesPerFood : World.MOVES_PER_FOOD;
+  },
+  getMovesPerWater: function () {
+    var data = World.getVariantData();
+    return typeof data.movesPerWater === 'number' ? data.movesPerWater : World.MOVES_PER_WATER;
+  },
+  getFightChance: function () {
+    var data = World.getVariantData();
+    return typeof data.fightChance === 'number' ? data.fightChance : World.FIGHT_CHANCE;
+  },
+  getMeatHeal: function () {
+    var data = World.getVariantData();
+    return typeof data.meatHeal === 'number' ? data.meatHeal : World.MEAT_HEAL;
+  },
+  getArrivalMessage: function () {
+    var data = World.getVariantData();
+    return data.arrivalMessage || null;
+  },
+  applyStartVariantTheme: function () {
+    if (World.panel) {
+      World.panel.toggleClass('magic-start', World.startVariant === 'magic');
+    }
+  },
+
   Weapons: {
     'fists': {
       verb: _('punch'),
@@ -130,6 +202,14 @@ var World = {
       options
     );
 
+    var variant = 'default';
+    if (typeof Engine !== 'undefined' && typeof Engine.determineStartVariant === 'function') {
+      variant = Engine.determineStartVariant();
+    } else if (typeof Room !== 'undefined' && typeof Room.getStartVariant === 'function') {
+      variant = Room.getStartVariant();
+    }
+    World.startVariant = World.resolveStartVariant(variant);
+
     // Setup probabilities. Sum must equal 1.
     World.TILE_PROBS[World.TILE.FOREST] = 0.15;
     World.TILE_PROBS[World.TILE.FIELD] = 0.35;
@@ -176,6 +256,7 @@ var World = {
 
     // Create the World panel
     this.panel = $('<div>').attr('id', "worldPanel").addClass('location').appendTo('#outerSlider');
+    World.applyStartVariantTheme();
 
     // Create the shrink wrapper
     var outer = $('<div>').attr('id', 'worldOuter').appendTo(this.panel);
@@ -481,7 +562,7 @@ var World = {
     World.foodMove++;
     World.waterMove++;
     // Food
-    var movesPerFood = World.MOVES_PER_FOOD;
+    var movesPerFood = World.getMovesPerFood();
     movesPerFood *= $SM.hasPerk('slow metabolism') ? 2 : 1;
     if(World.foodMove >= movesPerFood) {
       World.foodMove = 0;
@@ -511,7 +592,7 @@ var World = {
       Path.outfit['cured meat'] = num;
     }
     // Water
-    var movesPerWater = World.MOVES_PER_WATER;
+    var movesPerWater = World.getMovesPerWater();
     movesPerWater *= $SM.hasPerk('desert rat') ? 2 : 1;
     if(World.waterMove >= movesPerWater) {
       World.waterMove = 0;
@@ -543,7 +624,7 @@ var World = {
   },
 
   meatHeal: function() {
-    return World.MEAT_HEAL * ($SM.hasPerk('gastronome') ? 2 : 1);
+    return World.getMeatHeal() * ($SM.hasPerk('gastronome') ? 2 : 1);
   },
 
   medsHeal: function() {
@@ -556,7 +637,7 @@ var World = {
     World.fightMove = typeof World.fightMove == 'number' ? World.fightMove : 0;
     World.fightMove++;
     if(World.fightMove > World.FIGHT_DELAY) {
-      var chance = World.FIGHT_CHANCE;
+      var chance = World.getFightChance();
       if(typeof TimeWeather !== 'undefined' && TimeWeather && typeof TimeWeather.getEncounterChanceMultiplier === 'function') {
         chance *= TimeWeather.getEncounterChanceMultiplier();
       }
@@ -1049,16 +1130,17 @@ var World = {
 
   getMaxWater: function() {
 
+    var baseWater = World.getBaseWater();
     if($SM.get('stores["fluid recycler"]', true) > 0) {
-      return World.BASE_WATER + 100;
+      return baseWater + 100;
     } else if($SM.get('stores["water tank"]', true) > 0) {
-      return World.BASE_WATER + 50;
+      return baseWater + 50;
     } else if($SM.get('stores.cask', true) > 0) {
-      return World.BASE_WATER + 20;
+      return baseWater + 20;
     } else if($SM.get('stores.waterskin', true) > 0) {
-      return World.BASE_WATER + 10;
+      return baseWater + 10;
     }
-    return World.BASE_WATER;
+    return baseWater;
   },
 
   outpostUsed: function(x, y) {
@@ -1091,7 +1173,12 @@ var World = {
     World.usedOutposts = {};
     World.curPos = World.copyPos(World.VILLAGE_POS);
     World.drawMap();
+    World.applyStartVariantTheme();
     World.setTitle();
+    var arrivalMessage = World.getArrivalMessage();
+    if (arrivalMessage) {
+      Notifications.notify(World, arrivalMessage);
+    }
     AudioEngine.playBackgroundMusic(AudioLibrary.MUSIC_WORLD);
     World.dead = false;
     $('div#bagspace-world > div').empty();
@@ -1100,7 +1187,7 @@ var World = {
   },
 
   setTitle: function() {
-    document.title = _('A Barren World');
+    document.title = World.getWorldTitle();
   },
 
   copyPos: function(pos) {

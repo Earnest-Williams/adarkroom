@@ -105,6 +105,8 @@ var Outside = {
                         gatherActionText: _('gather wood'),
                         gatherNotification: _('dry brush and dead branches litter the forest floor'),
                         shelterLabel: _('take shelter'),
+                        gatherAmount: 10,
+                        gatherCartMultiplier: 5,
                         workerNames: {
                                 'gatherer': _('gatherer'),
                                 'hunter': _('hunter'),
@@ -116,12 +118,17 @@ var Outside = {
                                 'sulphur miner': _('sulphur miner'),
                                 'steelworker': _('steelworker'),
                                 'armourer': _('armourer')
-                        }
+                        },
+                        trapMessages: {}
                 },
                 magic: {
                         gatherActionText: _('harvest witchwood'),
                         gatherNotification: _('witchwood branches glimmer across the enchanted clearing'),
                         shelterLabel: _('raise ward'),
+                        gatherAmount: 12,
+                        gatherCartMultiplier: 5,
+                        gatherCharmChance: 0.15,
+                        gatherCharmMessage: _('a charm hums with latent wards'),
                         workerNames: {
                                 'gatherer': _('grove tender'),
                                 'hunter': _('star hunter'),
@@ -133,12 +140,29 @@ var Outside = {
                                 'sulphur miner': _('ember seeker'),
                                 'steelworker': _('starforger'),
                                 'armourer': _('arcane munitionsmith')
+                        },
+                        trapMessages: {
+                                'fur': _('shreds of moonhide'),
+                                'meat': _('slivers of spectral meat'),
+                                'scales': _('glittering wyrmscales'),
+                                'teeth': _('spirit fangs bound in twine'),
+                                'cloth': _('wisps of spellthread'),
+                                'charm': _('a charm thrums with latent wards')
                         }
                 }
         },
         getVariantData: function () {
                 var variant = Outside.startVariant || Outside.options.startVariant || 'default';
                 return Outside.themeVariants[variant] || Outside.themeVariants.default;
+        },
+        getGatherAmount: function () {
+                var data = Outside.getVariantData();
+                return typeof data.gatherAmount === 'number' ? data.gatherAmount : 10;
+        },
+        getCartGatherAmount: function (baseAmount) {
+                var data = Outside.getVariantData();
+                var multiplier = typeof data.gatherCartMultiplier === 'number' ? data.gatherCartMultiplier : 5;
+                return baseAmount * multiplier;
         },
         getGatherText: function () {
                 var data = Outside.getVariantData();
@@ -147,6 +171,13 @@ var Outside = {
         getGatherMessage: function () {
                 var data = Outside.getVariantData();
                 return data.gatherNotification || _('dry brush and dead branches litter the forest floor');
+        },
+        getTrapMessage: function (resource, fallback) {
+                var data = Outside.getVariantData();
+                if (data.trapMessages && data.trapMessages[resource]) {
+                        return data.trapMessages[resource];
+                }
+                return fallback;
         },
         getShelterLabel: function () {
                 var data = Outside.getVariantData();
@@ -835,33 +866,50 @@ var Outside = {
 		}
 	},
 	
-	gatherWood: function() {
+        gatherWood: function() {
                 Notifications.notify(Outside, Outside.getGatherMessage());
-		var gatherAmt = $SM.get('game.buildings["cart"]', true) > 0 ? 50 : 10;
-		$SM.add('stores.wood', gatherAmt);
-		AudioEngine.playSound(AudioLibrary.GATHER_WOOD);
-	},
-	
-	checkTraps: function() {
-		var drops = {};
-		var msg = [];
-		var numTraps = $SM.get('game.buildings["trap"]', true);
+                var baseAmount = Outside.getGatherAmount();
+                var gatherAmt = $SM.get('game.buildings["cart"]', true) > 0 ? Outside.getCartGatherAmount(baseAmount) : baseAmount;
+                $SM.add('stores.wood', gatherAmt);
+                var bonusMessage = Outside.maybeApplyGatherBonus();
+                if (bonusMessage) {
+                        Notifications.notify(Outside, bonusMessage);
+                }
+                AudioEngine.playSound(AudioLibrary.GATHER_WOOD);
+        },
+
+        maybeApplyGatherBonus: function () {
+                var data = Outside.getVariantData();
+                if (Outside.resolveStartVariant(Outside.startVariant) !== 'magic') {
+                        return null;
+                }
+                if (data.gatherCharmChance && Math.random() < data.gatherCharmChance) {
+                        $SM.add('stores.charm', 1);
+                        return data.gatherCharmMessage || _('a charm hums with latent wards');
+                }
+                return null;
+        },
+
+        checkTraps: function() {
+                var drops = {};
+                var msg = [];
+                var numTraps = $SM.get('game.buildings["trap"]', true);
 		var numBait = $SM.get('stores.bait', true);
 		var numDrops = numTraps + (numBait < numTraps ? numBait : numTraps);
 		for(var i = 0; i < numDrops; i++) {
 			var roll = Math.random();
 			for(var j in Outside.TrapDrops) {
-				var drop = Outside.TrapDrops[j];
-				if(roll < drop.rollUnder) {
-					var num = drops[drop.name];
-					if(typeof num == 'undefined') {
-						num = 0;
-						msg.push(drop.message);
-					}
-					drops[drop.name] = num + 1;
-					break;
-				}
-			}
+                                var drop = Outside.TrapDrops[j];
+                                if(roll < drop.rollUnder) {
+                                        var num = drops[drop.name];
+                                        if(typeof num == 'undefined') {
+                                                num = 0;
+                                                msg.push(Outside.getTrapMessage(drop.name, drop.message));
+                                        }
+                                        drops[drop.name] = num + 1;
+                                        break;
+                                }
+                        }
 		}
 		/// TRANSLATORS : Mind the whitespace at the end.
 		var s = _('the traps contain ');
