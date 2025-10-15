@@ -8,7 +8,11 @@
   "license": "MPL-2.0",
   "scripts": {
     "start": "node dev-server.js",
-    "update_pot": "pybabel extract -F lang/babel.cfg -c \"TRANSLATORS\" script -o lang/adarkroom.pot"
+    "update_pot": "pybabel extract -F lang/babel.cfg -c \"TRANSLATORS\" script -o lang/adarkroom.pot",
+    "build": "tsc --project tsconfig.json",
+    "lint": "npm run build --silent && npx eslint \"build/**/*.js\"",
+    "test": "npm run build --silent && node --test build/tests/**/*.test.js",
+    "clean": "rm -rf build"
   },
   "dependencies": {
     "express": "^4.19.2"
