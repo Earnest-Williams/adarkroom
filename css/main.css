@@ -10,19 +10,12 @@ body, .tooltip, select.menuBtn {
 
 :root {
         color-scheme: dark;
-        --layout-max-width: 960px;
-        --layout-padding: 32px;
-        --layout-gap: 28px;
-        --notifications-width: 220px;
-        --notifications-radius: 16px;
-}
-
-@media (max-width: 1100px) {
-        :root {
-                --layout-padding: 26px;
-                --layout-gap: 24px;
-                --notifications-width: 200px;
-        }
+        --layout-max-width: 1080px;
+        --layout-padding: clamp(24px, 4vw, 42px);
+        --layout-gap: clamp(18px, 3vw, 32px);
+        --notifications-width: clamp(220px, 24vw, 280px);
+        --notifications-radius: 20px;
+        --content-height: clamp(520px, 70vh, 760px);
 }
 
 html {
@@ -30,61 +23,58 @@ html {
 }
 
 body {
-        --scene-bg: #1b120a;
-        --scene-bg-secondary: #050301;
-        --scene-glow: rgba(255, 164, 82, 0.28);
+        --scene-bg: #130d08;
+        --scene-bg-secondary: #040201;
+        --scene-glow: rgba(255, 167, 94, 0.32);
         --scene-room-bg: #1b120a;
         --scene-room-bg-secondary: #050301;
-        --scene-room-glow: rgba(255, 164, 82, 0.28);
-        --scene-outside-bg: #081712;
+        --scene-room-glow: rgba(255, 164, 82, 0.32);
+        --scene-outside-bg: #071712;
         --scene-outside-bg-secondary: #010504;
-        --scene-outside-glow: rgba(88, 172, 118, 0.22);
-        --scene-path-bg: #211209;
-        --scene-path-bg-secondary: #060201;
-        --scene-path-glow: rgba(202, 143, 76, 0.22);
-        --scene-world-bg: #16110d;
-        --scene-world-bg-secondary: #040302;
-        --scene-world-glow: rgba(230, 184, 116, 0.16);
+        --scene-outside-glow: rgba(88, 172, 118, 0.26);
+        --scene-path-bg: #201107;
+        --scene-path-bg-secondary: #050200;
+        --scene-path-glow: rgba(202, 143, 76, 0.26);
+        --scene-world-bg: #15100c;
+        --scene-world-bg-secondary: #030201;
+        --scene-world-glow: rgba(230, 184, 116, 0.2);
         --scene-ship-bg: #111820;
         --scene-ship-bg-secondary: #05080c;
-        --scene-ship-glow: rgba(116, 166, 212, 0.2);
+        --scene-ship-glow: rgba(116, 166, 212, 0.24);
         --scene-space-bg: #040817;
         --scene-space-bg-secondary: #01030b;
-        --scene-space-glow: rgba(114, 146, 218, 0.28);
+        --scene-space-glow: rgba(114, 146, 218, 0.32);
         --scene-fabricator-bg: #141a1f;
         --scene-fabricator-bg-secondary: #040709;
-        --scene-fabricator-glow: rgba(132, 209, 255, 0.18);
-        --theme-accent: #f2ac63;
-        --theme-accent-strong: #ffd194;
-        --theme-accent-soft: rgba(242, 172, 99, 0.35);
-        --surface-bg: rgba(26, 22, 19, 0.88);
-        --surface-border: rgba(240, 206, 160, 0.35);
-        --surface-border-strong: rgba(240, 206, 160, 0.75);
-        --surface-shadow: rgba(8, 6, 5, 0.65);
-        --text-primary: #f3e6d2;
-        --text-secondary: rgba(243, 230, 210, 0.75);
+        --scene-fabricator-glow: rgba(132, 209, 255, 0.22);
+        --theme-accent: #f5b273;
+        --theme-accent-strong: #ffd9a3;
+        --theme-accent-soft: rgba(245, 178, 115, 0.42);
+        --theme-accent-highlight: rgba(245, 178, 115, 0.55);
+        --surface-bg: rgba(33, 26, 22, 0.9);
+        --surface-border: rgba(245, 201, 150, 0.35);
+        --surface-border-strong: rgba(245, 201, 150, 0.75);
+        --surface-shadow: rgba(8, 6, 5, 0.6);
+        --text-primary: #f5e9d5;
+        --text-secondary: rgba(245, 233, 213, 0.75);
         --text-invert: #150c05;
         --disabled-surface: rgba(87, 70, 55, 0.55);
-        --disabled-text: rgba(243, 230, 210, 0.3);
+        --disabled-text: rgba(245, 233, 213, 0.32);
         --status-bg: rgba(0, 0, 0, 0.32);
         height: 100%;
         margin: 0;
-        padding: 48px 0 64px;
-        background: radial-gradient(circle at 16% 18%, var(--scene-glow) 0%, transparent 55%),
-                radial-gradient(circle at 78% 82%, var(--theme-accent-soft) 0%, transparent 60%),
-                linear-gradient(170deg, var(--scene-bg) 0%, var(--scene-bg-secondary) 100%);
+        padding: clamp(36px, 6vh, 64px) 0 clamp(48px, 7vh, 72px);
+        background:
+                radial-gradient(circle at 14% 18%, var(--scene-glow) 0%, transparent 55%),
+                radial-gradient(circle at 70% 85%, rgba(40, 28, 15, 0.8) 0%, transparent 62%),
+                radial-gradient(circle at 86% 18%, rgba(127, 78, 43, 0.28) 0%, transparent 58%),
+                linear-gradient(175deg, var(--scene-bg) 0%, var(--scene-bg-secondary) 100%);
         color: var(--text-primary);
         transition: background 600ms ease, color 300ms ease;
         display: flex;
         flex-direction: column;
         align-items: center;
         min-height: 100%;
-}
-
-@media (max-width: 1100px) {
-        body {
-                padding: 36px 0 54px;
-        }
 }
 
 body.theme-magic {
@@ -112,6 +102,7 @@ body.theme-magic {
         --theme-accent: #c58dff;
         --theme-accent-strong: #ddb5ff;
         --theme-accent-soft: rgba(197, 141, 255, 0.4);
+        --theme-accent-highlight: rgba(197, 141, 255, 0.6);
         --surface-bg: rgba(35, 22, 53, 0.9);
         --surface-border: rgba(199, 155, 255, 0.35);
         --surface-border-strong: rgba(199, 155, 255, 0.75);
@@ -191,22 +182,25 @@ div.clear {
 div#wrapper {
         margin: 0 auto;
         width: min(
-                calc(700px + var(--notifications-width) + var(--layout-gap) + (var(--layout-padding) * 2)),
-                calc(100vw - 32px)
+                var(--layout-max-width),
+                calc(100vw - clamp(24px, 4vw, 48px))
         );
-        min-width: calc(700px + var(--notifications-width) + var(--layout-gap) + (var(--layout-padding) * 2));
+        min-width: min(
+                calc(700px + var(--notifications-width) + var(--layout-gap) + (var(--layout-padding) * 2)),
+                calc(100vw - clamp(24px, 4vw, 48px))
+        );
         padding: var(--layout-padding);
         position: relative;
-        background: linear-gradient(165deg, rgba(31, 26, 22, 0.9) 0%, rgba(15, 11, 9, 0.92) 100%);
+        background: linear-gradient(165deg, rgba(32, 26, 21, 0.92) 0%, rgba(13, 10, 9, 0.95) 100%);
         border: 1px solid var(--surface-border);
-        border-radius: 24px;
-        box-shadow: 0 26px 70px rgba(0, 0, 0, 0.55);
-        backdrop-filter: blur(14px);
+        border-radius: 28px;
+        box-shadow: 0 38px 85px rgba(0, 0, 0, 0.58);
+        backdrop-filter: blur(18px);
         display: grid;
-        grid-template-columns: var(--notifications-width) minmax(700px, 1fr);
+        grid-template-columns: minmax(0, var(--notifications-width)) minmax(700px, 1fr);
         column-gap: var(--layout-gap);
         row-gap: var(--layout-gap);
-        align-items: start;
+        align-items: stretch;
 }
 
 div#saveNotify {
@@ -229,12 +223,14 @@ div#saveNotify {
 div#content {
         position: relative;
         overflow: hidden;
-        height: 700px;
+        height: var(--content-height);
         color: var(--text-primary);
-        border-radius: 18px;
-        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04), 0 18px 45px rgba(0, 0, 0, 0.45);
+        border-radius: 26px;
+        background: linear-gradient(180deg, rgba(30, 24, 20, 0.92) 0%, rgba(16, 12, 10, 0.94) 100%);
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05), 0 26px 60px rgba(0, 0, 0, 0.55);
         grid-column: 2;
         grid-row: 1;
+        transition: background 400ms ease;
 }
 
 div#header {
@@ -369,7 +365,8 @@ div#outerSlider > div {
         position: relative;
         float: left;
         width: 700px;
-        height: 700px;
+        height: 100%;
+        min-height: 100%;
         overflow: hidden;
 }
 
@@ -383,11 +380,12 @@ div.location {
         width: 700px;
         min-height: 100%;
         box-sizing: border-box;
+        padding: 26px 32px 36px;
         background-color: var(--surface-bg);
-        background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.02) 0%, rgba(0, 0, 0, 0.35) 100%);
+        background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.03) 0%, rgba(0, 0, 0, 0.38) 100%);
         border: 1px solid var(--surface-border);
-        border-radius: 12px;
-        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.02), 0 15px 30px rgba(0, 0, 0, 0.35);
+        border-radius: 22px;
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04), 0 22px 45px rgba(0, 0, 0, 0.45);
         color: var(--text-primary);
 }
 
@@ -411,54 +409,64 @@ div#notifications {
         top: auto;
         left: auto;
         width: var(--notifications-width);
-        padding: 18px 20px 24px;
+        padding: 26px 26px 38px;
         overflow: hidden;
         color: var(--text-secondary);
         border-radius: var(--notifications-radius);
-        border: 1px solid rgba(240, 206, 160, 0.28);
-        background: linear-gradient(180deg, rgba(18, 14, 11, 0.9) 0%, rgba(15, 10, 7, 0.85) 100%);
-        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03), 0 20px 45px rgba(0, 0, 0, 0.45);
+        border: 1px solid var(--surface-border);
+        background-color: var(--surface-bg);
+        background-image:
+                linear-gradient(160deg, rgba(0, 0, 0, 0.45) 0%, rgba(0, 0, 0, 0.4) 45%, rgba(0, 0, 0, 0.55) 100%),
+                radial-gradient(circle at 18% 12%, var(--theme-accent-soft) 0%, transparent 65%);
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04), 0 24px 55px rgba(0, 0, 0, 0.55);
         display: flex;
         flex-direction: column;
-        gap: 12px;
-        backdrop-filter: blur(12px);
+        gap: 14px;
+        backdrop-filter: blur(16px);
         grid-column: 1;
         align-self: stretch;
         min-height: 100%;
-        max-height: 700px;
-        height: 100%;
+        max-height: var(--content-height);
+        height: var(--content-height);
         grid-row: 1;
 }
 
 div#notifications div.notification {
         position: relative;
         margin: 0;
-        padding: 10px 8px 10px 16px;
-        border-left: 3px solid rgba(242, 172, 99, 0.35);
-        border-radius: 10px;
-        background: rgba(255, 255, 255, 0.02);
-        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.25);
+        padding: 14px 16px 14px 20px;
+        border-left: 4px solid var(--theme-accent-highlight);
+        border-radius: 16px;
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0%, rgba(0, 0, 0, 0.4) 100%);
+        box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35);
         color: var(--text-secondary);
-        line-height: 1.6;
+        line-height: 1.65;
         font-size: 15px;
+        backdrop-filter: blur(8px);
+        transition: transform 200ms ease, box-shadow 250ms ease, border-color 200ms ease, background 200ms ease;
+}
+
+div#notifications div.notification:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 18px 35px rgba(0, 0, 0, 0.45);
+        border-left-color: var(--theme-accent);
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.09) 0%, rgba(0, 0, 0, 0.38) 100%);
 }
 
 div#notifications div.notification:first-child {
         border-left-color: var(--theme-accent);
         color: var(--text-primary);
-        background: rgba(242, 172, 99, 0.12);
+        background: linear-gradient(180deg, rgba(245, 178, 115, 0.22) 0%, rgba(0, 0, 0, 0.35) 100%);
+        box-shadow: 0 20px 42px rgba(0, 0, 0, 0.45);
 }
 
 div#notifyGradient {
         position: absolute;
         inset: 0;
         border-radius: var(--notifications-radius);
-        background: linear-gradient(
-                180deg,
-                rgba(0, 0, 0, 0) 0%,
-                rgba(10, 7, 5, 0.8) 92%,
-                rgba(10, 7, 5, 0.95) 100%
-        );
+        background:
+                linear-gradient(180deg, rgba(0, 0, 0, 0.12) 0%, rgba(0, 0, 0, 0) 20%, rgba(0, 0, 0, 0.75) 100%),
+                radial-gradient(circle at 8% 12%, var(--theme-accent-soft) 0%, transparent 55%);
         pointer-events: none;
 }
 
@@ -468,13 +476,15 @@ div.button {
         position: relative;
         text-align: center;
         border: 1px solid var(--surface-border-strong);
-        background: linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0%, rgba(0, 0, 0, 0.45) 100%);
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.06) 0%, rgba(0, 0, 0, 0.5) 100%);
         color: var(--text-primary);
-        border-radius: 12px;
-        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45);
-        width: 100px;
-        margin-bottom: 8px;
-        padding: 8px 12px;
+        border-radius: 14px;
+        box-shadow: 0 15px 34px rgba(0, 0, 0, 0.5);
+        width: 120px;
+        margin-bottom: 10px;
+        padding: 10px 14px;
+        font-size: 16px;
+        letter-spacing: 0.015em;
         cursor: pointer;
         -webkit-touch-callout: none;
         -webkit-user-select: none;
@@ -482,15 +492,17 @@ div.button {
         -moz-user-select: none;
         -ms-user-select: none;
         user-select: none;
-        transition: transform 150ms ease, box-shadow 250ms ease, color 200ms ease, border-color 200ms ease;
-        backdrop-filter: blur(6px);
+        transition: transform 150ms ease, box-shadow 250ms ease, color 200ms ease, border-color 200ms ease,
+                background 200ms ease;
+        backdrop-filter: blur(8px);
 }
 
 div.button:hover {
         text-decoration: none;
         color: var(--theme-accent-strong);
-        border-color: rgba(242, 172, 99, 0.65);
-        box-shadow: 0 16px 34px rgba(0, 0, 0, 0.55);
+        border-color: rgba(242, 172, 99, 0.7);
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.1) 0%, rgba(0, 0, 0, 0.45) 100%);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
         transform: translateY(-2px);
 }
 
@@ -628,7 +640,9 @@ div.button div.cooldown {
 }
 
 div.button div.tooltip {
-	width: 100px;
+        min-width: 120px;
+        max-width: 240px;
+        width: max-content;
 }
 
 /* Tooltip */
