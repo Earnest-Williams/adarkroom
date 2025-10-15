@@ -1,8 +1,8 @@
 var Path = {
-	DEFAULT_BAG_SPACE: 10,
-	_STORES_OFFSET: 0,
-	// Everything not in this list weighs 1
-	Weight: {
+        DEFAULT_BAG_SPACE: 10,
+        _STORES_OFFSET: 0,
+        // Everything not in this list weighs 1
+        Weight: {
 		'bone spear': 2,
 		'iron sword': 3,
 		'steel sword': 5,
@@ -12,31 +12,77 @@ var Path = {
 		'laser rifle': 5,
     'plasma rifle': 5,
 		'bolas': 0.5,
-	},
-		
-	name: 'Path',
-	options: {}, // Nuthin'
-	init: function(options) {
-		this.options = $.extend(
-			this.options,
-			options
-		);
-		
-		// Init the World
-		World.init();
-		
-		// Create the path tab
-		this.tab = Header.addLocation(_("A Dusty Path"), "path", Path);
-		
-		// Create the Path panel
-		this.panel = $('<div>').attr('id', "pathPanel")
-			.addClass('location')
-			.appendTo('div#locationSlider');
+        },
 
-		this.scroller = $('<div>').attr('id', 'pathScroller').appendTo(this.panel);
-		
-		// Add the outfitting area
-		var outfitting = $('<div>').attr({'id': 'outfitting', 'data-legend': _('supplies:')}).appendTo(this.scroller);
+        name: 'Path',
+        options: {
+                startVariant: 'default'
+        }, // Nuthin'
+        startVariant: 'default',
+        tab: null,
+        panel: null,
+        resolveStartVariant: function (variant) {
+                return variant === 'magic' ? 'magic' : 'default';
+        },
+        getLocationLabel: function (variant) {
+                if (variant === 'magic') {
+                        return _('A Luminous Path');
+                }
+                return _('A Dusty Path');
+        },
+        applyStartVariantTheme: function (variant) {
+                var normalized = Path.resolveStartVariant(variant);
+                Path.startVariant = normalized;
+                Path.options = Path.options || {};
+                Path.options.startVariant = normalized;
+
+                if (Path.tab && Path.tab.length) {
+                        Path.tab.text(Path.getLocationLabel(normalized));
+                }
+
+                if (Path.panel && Path.panel.length) {
+                        Path.panel.toggleClass('magic-start', normalized === 'magic');
+                }
+        },
+        initMagicStart: function (options) {
+                options = options || {};
+                options.startVariant = 'magic';
+                if (Path.panel && Path.panel.length) {
+                        Path.applyStartVariantTheme('magic');
+                        return;
+                }
+                Path.init(options);
+        },
+        init: function(options) {
+                this.options = $.extend(
+                        this.options,
+                        options
+                );
+
+                var variant = Path.resolveStartVariant(this.options.startVariant);
+                Path.options.startVariant = variant;
+                Path.startVariant = variant;
+
+                // Init the World
+                World.init();
+
+                // Create the path tab
+                this.tab = Header.addLocation(Path.getLocationLabel(variant), "path", Path);
+                Path.tab = this.tab;
+
+                // Create the Path panel
+                this.panel = $('<div>').attr('id', "pathPanel")
+                        .addClass('location')
+                        .appendTo('div#locationSlider');
+                Path.panel = this.panel;
+                if (variant === 'magic') {
+                        this.panel.addClass('magic-start');
+                }
+
+                this.scroller = $('<div>').attr('id', 'pathScroller').appendTo(this.panel);
+
+                // Add the outfitting area
+                var outfitting = $('<div>').attr({'id': 'outfitting', 'data-legend': _('supplies:')}).appendTo(this.scroller);
 		$('<div>').attr('id', 'bagspace').appendTo(outfitting);
 		
 		// Add the embark button
@@ -53,14 +99,27 @@ var Path = {
 		Engine.updateSlider();
 		
 		//subscribe to stateUpdates
-		$.Dispatch('stateUpdate').subscribe(Path.handleStateUpdates);
-	},
-	
-	openPath: function() {
-		Path.init();
-		Engine.event('progress', 'path');
-		Notifications.notify(Room, _('the compass points ' + World.dir));
-	},
+                $.Dispatch('stateUpdate').subscribe(Path.handleStateUpdates);
+        },
+
+        openPath: function() {
+                var variant = 'default';
+                if (typeof Engine !== 'undefined' && typeof Engine.determineStartVariant === 'function') {
+                        variant = Engine.determineStartVariant();
+                } else if (typeof Room !== 'undefined' && typeof Room.getStartVariant === 'function') {
+                        variant = Room.getStartVariant();
+                }
+
+                if (typeof Engine !== 'undefined' && typeof Engine.initializeStartLocations === 'function') {
+                        Engine.initializeStartLocations(variant);
+                } else if (variant === 'magic' && typeof Path.initMagicStart === 'function') {
+                        Path.initMagicStart();
+                } else {
+                        Path.init();
+                }
+                Engine.event('progress', 'path');
+                Notifications.notify(Room, _('the compass points ' + World.dir));
+        },
 	
 	getWeight: function(thing) {
 		var w = Path.Weight[thing];

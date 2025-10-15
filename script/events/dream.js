@@ -28,8 +28,7 @@ Events.RoomMagicDream = {
                 wake: {
                         onLoad: function () {
                                 Room.setStartVariant('magic');
-                                Room.prepareMagicalPath();
-                                Room.updateButton();
+                                Engine.enterMagicStart();
                         },
                         text: [
                                 _('you jolt awake, the vision of the crystal burning behind your eyes.'),

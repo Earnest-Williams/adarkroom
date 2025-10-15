@@ -836,13 +836,26 @@ var Room = {
 		Room._tempTimer = Engine.setTimeout(Room.adjustTemp, Room._ROOM_WARM_DELAY);
 	},
 
-	unlockForest: function () {
-		$SM.set('stores.wood', 4);
-		Outside.init();
-		Notifications.notify(Room, _("the wind howls outside"));
-		Notifications.notify(Room, _("the wood is running out"));
-		Engine.event('progress', 'outside');
-	},
+        unlockForest: function () {
+                $SM.set('stores.wood', 4);
+                var variant = 'default';
+                if (typeof Engine !== 'undefined' && typeof Engine.determineStartVariant === 'function') {
+                        variant = Engine.determineStartVariant();
+                } else {
+                        variant = Room.getStartVariant();
+                }
+
+                if (typeof Engine !== 'undefined' && typeof Engine.initializeStartLocations === 'function') {
+                        Engine.initializeStartLocations(variant);
+                } else if (variant === 'magic' && typeof Outside.initMagicStart === 'function') {
+                        Outside.initMagicStart();
+                } else {
+                        Outside.init();
+                }
+                Notifications.notify(Room, _("the wind howls outside"));
+                Notifications.notify(Room, _("the wood is running out"));
+                Engine.event('progress', 'outside');
+        },
 
 	updateBuilderState: function () {
 		var lBuilder = $SM.get('game.builder.level');
