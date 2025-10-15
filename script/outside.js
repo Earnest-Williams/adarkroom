@@ -2,12 +2,18 @@
  * Module that registers the outdoors functionality
  */
 var Outside = {
-	name: _("Outside"),
-	
-	_STORES_OFFSET: 0,
-	_GATHER_DELAY: 60,
-	_TRAPS_DELAY: 90,
-	_POP_DELAY: [0.5, 3],
+        name: _("Outside"),
+        options: {
+                startVariant: 'default'
+        },
+        startVariant: 'default',
+        tab: null,
+        panel: null,
+
+        _STORES_OFFSET: 0,
+        _GATHER_DELAY: 60,
+        _TRAPS_DELAY: 90,
+        _POP_DELAY: [0.5, 3],
 	_HUT_ROOM: 4,
 	
 	_INCOME: {
@@ -128,31 +134,76 @@ var Outside = {
 			rollUnder: 1.0,
 			name: 'charm',
 			message: _('a crudely made charm')
-		}
-	],
-	
-	init: function(options) {
-		this.options = $.extend(
-			this.options,
-			options
-		);
-		
-		if(Engine._debug) {
-			this._GATHER_DELAY = 0;
-			this._TRAPS_DELAY = 0;
-		}
-		
-		// Create the outside tab
-		this.tab = Header.addLocation(_("A Silent Forest"), "outside", Outside);
-		
-		// Create the Outside panel
-		this.panel = $('<div>').attr('id', "outsidePanel")
-			.addClass('location')
-			.appendTo('div#locationSlider');
+                }
+        ],
 
-		var statusRow = $('<div>').addClass('outside-status').appendTo(this.panel);
-		Outside._timeDisplay = $('<span>').addClass('outside-status-time').appendTo(statusRow);
-		Outside._weatherDisplay = $('<span>').addClass('outside-status-weather').appendTo(statusRow);
+        resolveStartVariant: function (variant) {
+                return variant === 'magic' ? 'magic' : 'default';
+        },
+
+        getLocationLabel: function (variant) {
+                if (variant === 'magic') {
+                        return _("An Enchanted Clearing");
+                }
+                return _("A Silent Forest");
+        },
+
+        applyStartVariantTheme: function (variant) {
+                var normalized = Outside.resolveStartVariant(variant);
+                Outside.startVariant = normalized;
+                Outside.options = Outside.options || {};
+                Outside.options.startVariant = normalized;
+
+                if (Outside.tab && Outside.tab.length) {
+                        Outside.tab.text(Outside.getLocationLabel(normalized));
+                }
+
+                if (Outside.panel && Outside.panel.length) {
+                        Outside.panel.toggleClass('magic-start', normalized === 'magic');
+                }
+        },
+
+        initMagicStart: function (options) {
+                options = options || {};
+                options.startVariant = 'magic';
+                if (Outside.panel && Outside.panel.length) {
+                        Outside.applyStartVariantTheme('magic');
+                        return;
+                }
+                Outside.init(options);
+        },
+
+        init: function(options) {
+                this.options = $.extend(
+                        this.options,
+                        options
+                );
+
+                var variant = Outside.resolveStartVariant(this.options.startVariant);
+                Outside.options.startVariant = variant;
+                Outside.startVariant = variant;
+
+                if(Engine._debug) {
+                        this._GATHER_DELAY = 0;
+                        this._TRAPS_DELAY = 0;
+                }
+
+                // Create the outside tab
+                this.tab = Header.addLocation(Outside.getLocationLabel(variant), "outside", Outside);
+                Outside.tab = this.tab;
+
+                // Create the Outside panel
+                this.panel = $('<div>').attr('id', "outsidePanel")
+                        .addClass('location')
+                        .appendTo('div#locationSlider');
+                Outside.panel = this.panel;
+                if (variant === 'magic') {
+                        this.panel.addClass('magic-start');
+                }
+
+                var statusRow = $('<div>').addClass('outside-status').appendTo(this.panel);
+                Outside._timeDisplay = $('<span>').addClass('outside-status-time').appendTo(statusRow);
+                Outside._weatherDisplay = $('<span>').addClass('outside-status-weather').appendTo(statusRow);
 
 		var shelterRow = $('<div>').addClass('outside-shelter').appendTo(this.panel);
 		Outside._shelterButton = new Button.Button({
@@ -190,8 +241,8 @@ var Outside = {
 			width: '80px'
 		}).appendTo('div#outsidePanel');
 
-		Outside.updateTrapButton();
-	},
+                Outside.updateTrapButton();
+        },
 	
 	getMaxPopulation: function() {
 		return $SM.get('game.buildings["hut"]', true) * Outside._HUT_ROOM;

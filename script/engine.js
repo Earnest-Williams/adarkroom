@@ -224,13 +224,8 @@
       Events.init();
       Room.init();
 
-
-      if(typeof $SM.get('stores.wood') != 'undefined') {
-        Outside.init();
-      }
-      if($SM.get('stores.compass', true) > 0) {
-        Path.init();
-      }
+      var startVariant = Engine.determineStartVariant();
+      Engine.initializeStartLocations(startVariant);
       if ($SM.get('features.location.fabricator')) {
         Fabricator.init();
       }
@@ -259,11 +254,84 @@
     },
     resumeAudioContext: function () {
       AudioEngine.tryResumingAudioContext();
-      
+
       // turn on music!
           AudioEngine.setMasterVolume($SM.get('config.soundOn') ? 1.0 : 0.0, 0);
 
       document.removeEventListener('click', Engine.resumeAudioContext);
+    },
+    determineStartVariant: function () {
+      if (typeof Room !== 'undefined' && typeof Room.getStartVariant === 'function') {
+        return Room.getStartVariant();
+      }
+      if (typeof $SM !== 'undefined' && typeof $SM.get === 'function') {
+        var storedVariant = $SM.get('game.startVariant');
+        if (storedVariant) {
+          return storedVariant;
+        }
+      }
+      return 'default';
+    },
+    initializeStartLocations: function (variant) {
+      var normalizedVariant = variant === 'magic' ? 'magic' : 'default';
+      if (typeof Room !== 'undefined' && typeof Room.ensureStartVariantPreparation === 'function') {
+        Room.ensureStartVariantPreparation(normalizedVariant);
+      }
+
+      var hasOutside = typeof Outside !== 'undefined';
+      var outsideBuilt = hasOutside && Outside.panel && Outside.panel.length;
+      if (typeof $SM.get('stores.wood') != 'undefined' && hasOutside) {
+        if (normalizedVariant === 'magic' && typeof Outside.initMagicStart === 'function') {
+          if (outsideBuilt && typeof Outside.applyStartVariantTheme === 'function') {
+            Outside.applyStartVariantTheme(normalizedVariant);
+          } else {
+            Outside.initMagicStart();
+          }
+        } else {
+          if (outsideBuilt) {
+            if (typeof Outside.applyStartVariantTheme === 'function') {
+              Outside.applyStartVariantTheme('default');
+            }
+          } else {
+            Outside.init();
+          }
+        }
+      }
+
+      var hasPath = typeof Path !== 'undefined';
+      var pathBuilt = hasPath && Path.panel && Path.panel.length;
+      if ($SM.get('stores.compass', true) > 0 && hasPath) {
+        if (normalizedVariant === 'magic' && typeof Path.initMagicStart === 'function') {
+          if (pathBuilt && typeof Path.applyStartVariantTheme === 'function') {
+            Path.applyStartVariantTheme(normalizedVariant);
+          } else {
+            Path.initMagicStart();
+          }
+        } else {
+          if (pathBuilt) {
+            if (typeof Path.applyStartVariantTheme === 'function') {
+              Path.applyStartVariantTheme('default');
+            }
+          } else {
+            Path.init();
+          }
+        }
+      }
+    },
+    enterMagicStart: function () {
+      if (typeof Room !== 'undefined' && typeof Room.setStartVariant === 'function') {
+        Room.setStartVariant('magic');
+      } else if (typeof $SM !== 'undefined' && typeof $SM.set === 'function') {
+        $SM.set('game.startVariant', 'magic');
+      }
+
+      Engine.initializeStartLocations('magic');
+
+      if (typeof Room !== 'undefined' && typeof Room.updateButton === 'function') {
+        Room.updateButton();
+      }
+
+      Engine.updateSlider();
     },
     browserValid: function() {
       return ( location.search.indexOf( 'ignorebrowser=true' ) >= 0 || ( typeof Storage != 'undefined' && !oldIE ) );
