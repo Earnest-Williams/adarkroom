@@ -557,6 +557,10 @@ var World = {
     World.fightMove++;
     if(World.fightMove > World.FIGHT_DELAY) {
       var chance = World.FIGHT_CHANCE;
+      if(typeof TimeWeather !== 'undefined' && TimeWeather && typeof TimeWeather.getEncounterChanceMultiplier === 'function') {
+        chance *= TimeWeather.getEncounterChanceMultiplier();
+      }
+      chance = Math.max(0, Math.min(chance, 1));
       chance *= $SM.hasPerk('stealthy') ? 0.5 : 1;
       if(Math.random() < chance) {
         World.fightMove = 0;

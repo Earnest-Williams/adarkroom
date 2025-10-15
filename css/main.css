@@ -663,3 +663,27 @@ body.noMask #description {
 #dropMenu > div:hover {
 	text-decoration: underline;
 }
+
+.outside-status {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.outside-status-time,
+.outside-status-weather {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.outside-shelter {
+  margin-bottom: 12px;
+}
+
+.button .buttonLabel {
+  display: inline-block;
+  padding-right: 4px;
+}

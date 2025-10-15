@@ -94,6 +94,10 @@ var Outside = {
 			}
 		}
 	},
+	_timeDisplay: null,
+	_weatherDisplay: null,
+	_shelterButton: null,
+	_shelterLabel: null,
 	TrapDrops: [
 		{
 			rollUnder: 0.5,
@@ -145,7 +149,21 @@ var Outside = {
 		this.panel = $('<div>').attr('id', "outsidePanel")
 			.addClass('location')
 			.appendTo('div#locationSlider');
-		
+
+		var statusRow = $('<div>').addClass('outside-status').appendTo(this.panel);
+		Outside._timeDisplay = $('<span>').addClass('outside-status-time').appendTo(statusRow);
+		Outside._weatherDisplay = $('<span>').addClass('outside-status-weather').appendTo(statusRow);
+
+		var shelterRow = $('<div>').addClass('outside-shelter').appendTo(this.panel);
+		Outside._shelterButton = new Button.Button({
+			id: 'shelterButton',
+			text: '',
+			click: Outside.takeShelter,
+			width: '120px'
+		}).appendTo(shelterRow);
+		Outside._shelterLabel = $('<span>').addClass('buttonLabel').text(_('take shelter')).prependTo(Outside._shelterButton);
+		Outside._shelterButton.hide();
+
 		//subscribe to stateUpdates
 		$.Dispatch('stateUpdate').subscribe(Outside.handleStateUpdates);
 		
@@ -159,9 +177,10 @@ var Outside = {
 		this.updateVillage();
 		Outside.updateWorkersView();
 		Outside.updateVillageIncome();
-		
+		Outside.updateTimeWeather();
+
 		Engine.updateSlider();
-		
+
 		// Create the gather button
 		new Button.Button({
 			id: 'gatherButton',
@@ -503,19 +522,26 @@ var Outside = {
 		return added;
 	},
 	
-	updateVillageIncome: function() {		
+	updateVillageIncome: function() {
 		for(var worker in Outside._INCOME) {
 			var income = Outside._INCOME[worker];
 			var num = worker == 'gatherer' ? Outside.getNumGatherers() : $SM.get('game.workers["'+worker+'"]');
 			if(typeof num == 'number') {
-				var stores = {};
 				if(num < 0) num = 0;
 				var tooltip = $('.tooltip', 'div#workers_row_' + worker.replace(' ', '-'));
 				tooltip.empty();
 				var needsUpdate = false;
 				var curIncome = $SM.getIncome(worker);
-				for(var store in income.stores) {
-					stores[store] = income.stores[store] * num;
+				var perWorker = income.stores;
+				if (typeof TimeWeather !== 'undefined' && TimeWeather && typeof TimeWeather.applyIncomeModifiers === 'function') {
+					perWorker = TimeWeather.applyIncomeModifiers(worker, perWorker);
+				}
+				var stores = {};
+				for(var store in perWorker) {
+					if(!Object.prototype.hasOwnProperty.call(perWorker, store)) {
+						continue;
+					}
+					stores[store] = perWorker[store] * num;
 					if(curIncome[store] != stores[store]) needsUpdate = true;
 					var row = $('<div>').addClass('storeRow');
 					$('<div>').addClass('row_key').text(_(store)).appendTo(row);
@@ -532,7 +558,83 @@ var Outside = {
 		}
 		Room.updateIncomeView();
 	},
-	
+
+	updateTimeWeather: function() {
+		if(!Outside._timeDisplay) {
+			return;
+		}
+		if (typeof TimeWeather === 'undefined' || !TimeWeather) {
+			Outside._timeDisplay.text('');
+			if (Outside._weatherDisplay) {
+				Outside._weatherDisplay.text('');
+			}
+			Outside.updateShelterAction();
+			return;
+		}
+
+		var tod = typeof TimeWeather.getTimeOfDay === 'function' ? TimeWeather.getTimeOfDay() : 'dawn';
+		var icon = typeof TimeWeather.getTimeOfDayIcon === 'function' ? TimeWeather.getTimeOfDayIcon(tod) : '';
+		var currentTime = typeof TimeWeather.getFormattedTime === 'function' ? TimeWeather.getFormattedTime() : '';
+		var timeParts = [];
+		if(icon) timeParts.push(icon);
+		timeParts.push(_(tod));
+		if(currentTime) timeParts.push(currentTime);
+		Outside._timeDisplay.text(timeParts.join(' '));
+
+		if(Outside._weatherDisplay) {
+			var weather = typeof TimeWeather.getWeatherKind === 'function' ? TimeWeather.getWeatherKind() : 'clear';
+			var weatherIcon = typeof TimeWeather.getWeatherIcon === 'function' ? TimeWeather.getWeatherIcon(weather) : '';
+			var intensity = typeof TimeWeather.getWeatherIntensity === 'function' ? TimeWeather.getWeatherIntensity() : 0;
+			var weatherParts = [];
+			if(weatherIcon) weatherParts.push(weatherIcon);
+			weatherParts.push(_(weather));
+			if(intensity > 0) {
+				weatherParts.push('(' + Math.round(intensity * 100) + '%)');
+			}
+			Outside._weatherDisplay.text(weatherParts.join(' '));
+		}
+
+		Outside.updateShelterAction();
+	},
+
+	updateShelterAction: function() {
+		if(!Outside._shelterButton) {
+			return;
+		}
+		if (typeof TimeWeather === 'undefined' || !TimeWeather || typeof TimeWeather.isAdverseWeather !== 'function') {
+			Outside._shelterButton.hide();
+			return;
+		}
+
+		if(!TimeWeather.isAdverseWeather()) {
+			Outside._shelterButton.hide();
+			Button.setDisabled(Outside._shelterButton, false);
+			Outside._shelterLabel.text(_('take shelter'));
+			return;
+		}
+
+		Outside._shelterButton.show();
+		var active = typeof TimeWeather.isShelterActive === 'function' ? TimeWeather.isShelterActive() : false;
+		var ticksLeft = typeof TimeWeather.getShelterTicksLeft === 'function' ? TimeWeather.getShelterTicksLeft() : 0;
+		if(active) {
+			Outside._shelterLabel.text(_('sheltering ({0})', ticksLeft));
+			Button.setDisabled(Outside._shelterButton, true);
+		} else {
+			Outside._shelterLabel.text(_('take shelter'));
+			Button.setDisabled(Outside._shelterButton, false);
+		}
+	},
+
+	takeShelter: function() {
+		if (typeof TimeWeather === 'undefined' || !TimeWeather || typeof TimeWeather.activateShelter !== 'function') {
+			return;
+		}
+		var activated = TimeWeather.activateShelter();
+		if(activated) {
+			Outside.updateShelterAction();
+		}
+	},
+
 	updateTrapButton: function() {
 		var btn = $('div#trapsButton');
 		if($SM.get('game.buildings["trap"]', true) > 0) {
@@ -659,6 +761,9 @@ var Outside = {
 		} else if(e.stateName.indexOf('game.workers') === 0 || e.stateName.indexOf('game.population') === 0){
 			Outside.updateVillage();
 			Outside.updateWorkersView();
+			Outside.updateVillageIncome();
+		} else if(e.category == 'meta' || e.stateName.indexOf('meta.') === 0){
+			Outside.updateTimeWeather();
 			Outside.updateVillageIncome();
 		}
 	}

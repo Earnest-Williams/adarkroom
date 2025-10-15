@@ -1,0 +1,143 @@
+{
+  "timeOfDay": [
+    { "slice": "dawn", "startHour": 5, "endHour": 6 },
+    { "slice": "day", "startHour": 7, "endHour": 18 },
+    { "slice": "dusk", "startHour": 19, "endHour": 20 },
+    { "slice": "night", "startHour": 21, "endHour": 4 }
+  ],
+  "income": {
+    "default": {
+      "dawn": 1.0,
+      "day": 1.0,
+      "dusk": 0.9,
+      "night": 0.6
+    },
+    "perSource": {
+      "gatherer": {
+        "dawn": 1.1,
+        "day": 1.0,
+        "dusk": 0.8,
+        "night": 0.5
+      },
+      "hunter": {
+        "dusk": 0.9,
+        "night": 0.7
+      },
+      "trapper": {
+        "dawn": 1.0,
+        "day": 1.0,
+        "dusk": 0.95,
+        "night": 0.8
+      }
+    }
+  },
+  "encounters": {
+    "timeOfDay": {
+      "dawn": 1.0,
+      "day": 0.85,
+      "dusk": 1.1,
+      "night": 1.35
+    }
+  },
+  "weather": {
+    "durations": {
+      "clear": [12, 36],
+      "rain": [10, 30],
+      "storm": [6, 20],
+      "fog": [8, 24],
+      "snow": [12, 36],
+      "blizzard": [6, 18],
+      "heatwave": [12, 30]
+    },
+    "intensity": {
+      "clear": [0.0, 0.25],
+      "rain": [0.35, 0.85],
+      "storm": [0.6, 1.0],
+      "fog": [0.3, 0.7],
+      "snow": [0.4, 0.9],
+      "blizzard": [0.7, 1.0],
+      "heatwave": [0.5, 0.95]
+    },
+    "transitions": {
+      "default": {
+        "clear": { "clear": 5, "rain": 2, "fog": 1, "storm": 1, "snow": 1, "heatwave": 1, "blizzard": 0.5 },
+        "rain": { "clear": 3, "rain": 2, "storm": 1.5, "fog": 1.5, "snow": 0.5, "heatwave": 0.25, "blizzard": 0.25 },
+        "storm": { "clear": 2, "rain": 2, "storm": 1, "fog": 0.5, "snow": 0.75, "heatwave": 0.25, "blizzard": 0.5 },
+        "fog": { "clear": 3, "rain": 1.5, "storm": 0.5, "fog": 2, "snow": 0.5, "heatwave": 0.25, "blizzard": 0.25 },
+        "snow": { "clear": 2, "rain": 0.5, "storm": 0.5, "fog": 0.5, "snow": 2.5, "heatwave": 0.25, "blizzard": 1.5 },
+        "blizzard": { "clear": 1.5, "rain": 0.25, "storm": 0.5, "fog": 0.25, "snow": 2, "heatwave": 0.1, "blizzard": 1.5 },
+        "heatwave": { "clear": 3, "rain": 0.25, "storm": 0.5, "fog": 0.25, "snow": 0.1, "heatwave": 2.5, "blizzard": 0.1 }
+      },
+      "spring": {
+        "clear": { "clear": 4, "rain": 3, "fog": 2, "storm": 1, "snow": 0.5, "heatwave": 0.25, "blizzard": 0.25 },
+        "rain": { "clear": 2.5, "rain": 3, "storm": 1.5, "fog": 2, "snow": 0.5, "heatwave": 0.2, "blizzard": 0.2 },
+        "fog": { "clear": 2.5, "rain": 2, "storm": 0.75, "fog": 2.5, "snow": 0.4, "heatwave": 0.2, "blizzard": 0.2 }
+      },
+      "summer": {
+        "clear": { "clear": 5, "rain": 1.5, "storm": 2, "fog": 1, "snow": 0.1, "heatwave": 2, "blizzard": 0.05 },
+        "rain": { "clear": 3.5, "rain": 1.5, "storm": 2, "fog": 1, "snow": 0.1, "heatwave": 1.5, "blizzard": 0.05 },
+        "heatwave": { "clear": 3, "rain": 0.75, "storm": 1, "fog": 0.5, "snow": 0.05, "heatwave": 3, "blizzard": 0.05 }
+      },
+      "autumn": {
+        "clear": { "clear": 3, "rain": 2.5, "storm": 1.5, "fog": 1.5, "snow": 1, "heatwave": 0.5, "blizzard": 0.5 },
+        "rain": { "clear": 2.5, "rain": 2.5, "storm": 1.5, "fog": 1.5, "snow": 0.8, "heatwave": 0.3, "blizzard": 0.5 },
+        "fog": { "clear": 2.5, "rain": 2, "storm": 1, "fog": 2.5, "snow": 0.8, "heatwave": 0.3, "blizzard": 0.5 }
+      },
+      "winter": {
+        "clear": { "clear": 3, "rain": 0.5, "storm": 0.75, "fog": 1, "snow": 2.5, "heatwave": 0.05, "blizzard": 1.5 },
+        "snow": { "clear": 2, "rain": 0.25, "storm": 0.5, "fog": 0.75, "snow": 3, "heatwave": 0.05, "blizzard": 1.75 },
+        "blizzard": { "clear": 1.5, "rain": 0.1, "storm": 0.3, "fog": 0.5, "snow": 2.5, "heatwave": 0.05, "blizzard": 2 }
+      }
+    },
+    "income": {
+      "default": {
+        "clear": 1.0,
+        "rain": 0.95,
+        "storm": 0.7,
+        "fog": 0.9,
+        "snow": 0.8,
+        "blizzard": 0.5,
+        "heatwave": 0.85
+      },
+      "perSource": {
+        "gatherer": {
+          "rain": 0.75,
+          "storm": 0.5,
+          "fog": 0.85,
+          "snow": 0.7,
+          "blizzard": 0.4,
+          "heatwave": 0.75
+        },
+        "hunter": {
+          "rain": 1.05,
+          "storm": 0.7,
+          "fog": 1.1,
+          "snow": 1.2,
+          "blizzard": 1.35,
+          "heatwave": 0.9
+        },
+        "trapper": {
+          "rain": 1.15,
+          "storm": 0.85,
+          "fog": 1.1,
+          "snow": 1.0,
+          "blizzard": 0.85,
+          "heatwave": 0.9
+        }
+      }
+    },
+    "encounters": {
+      "clear": 1.0,
+      "rain": 0.9,
+      "storm": 0.7,
+      "fog": 1.2,
+      "snow": 0.95,
+      "blizzard": 0.8,
+      "heatwave": 1.05
+    }
+  },
+  "shelter": {
+    "durationTicks": 12,
+    "penaltyReduction": 0.5
+  }
+}
