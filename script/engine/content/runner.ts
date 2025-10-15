@@ -1,6 +1,6 @@
 import type { RootState } from "../../../types/state";
-import { StateManager } from "../state/StateManager";
-import { bus } from "../events/bus";
+import { StateManager } from "../state/StateManager.js";
+import { bus } from "../events/bus.js";
 import type {
   Choice,
   Condition,
