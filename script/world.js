@@ -1,4 +1,5 @@
 var World = {
+  scene: 'world',
   RADIUS: 30,
   VILLAGE_POS: [30, 30],
   TILE: {

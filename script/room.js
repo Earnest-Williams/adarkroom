@@ -2,8 +2,9 @@
  * Module that registers the simple room functionality
  */
 var Room = {
-	// times in (minutes * seconds * milliseconds)
-	_FIRE_COOL_DELAY: 5 * 60 * 1000, // time after a stoke before the fire cools
+        scene: 'room',
+        // times in (minutes * seconds * milliseconds)
+        _FIRE_COOL_DELAY: 5 * 60 * 1000, // time after a stoke before the fire cools
 	_ROOM_WARM_DELAY: 30 * 1000, // time between room temperature updates
 	_BUILDER_STATE_DELAY: 0.5 * 60 * 1000, // time between builder state updates
 	_STOKE_COOLDOWN: 10, // cooldown to stoke the fire
@@ -968,13 +969,17 @@ var Room = {
 		return variant;
 	},
 
-	setStartVariant: function (variant) {
-		var current = Room.getStartVariant();
-		if (current === variant) {
-			return;
-		}
-		$SM.set('game.startVariant', variant);
-	},
+        setStartVariant: function (variant) {
+                var normalized = variant === 'magic' ? 'magic' : 'default';
+                var current = Room.getStartVariant();
+                if (current === normalized) {
+                        return;
+                }
+                $SM.set('game.startVariant', normalized);
+                if (typeof Engine !== 'undefined' && typeof Engine.updateVisualTheme === 'function') {
+                        Engine.updateVisualTheme(Engine.activeModule || Room);
+                }
+        },
 
 	ensureStartVariantPreparation: function (variant) {
 		var currentVariant = variant || Room.getStartVariant();

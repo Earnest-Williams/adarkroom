@@ -1,30 +1,44 @@
 div#village {
-	position: absolute;
-	top: 0px;
-	right: 0px;
-	border: 1px solid black;
-	cursor: default;
-	padding: 5px 10px;
-	width: 200px;
+        position: absolute;
+        top: 0px;
+        right: 0px;
+        border: 1px solid var(--surface-border-strong);
+        cursor: default;
+        padding: 5px 10px;
+        width: 200px;
+        background: rgba(0, 0, 0, 0.35);
+        border-radius: 14px;
+        box-shadow: 0 18px 35px rgba(0, 0, 0, 0.45);
+        color: var(--text-primary);
 }
 
 div#population {
-	position: absolute;
-	top: -13px;
-	right: 10px;
-	background-color: white;
+        position: absolute;
+        top: -13px;
+        right: 10px;
+        background-color: var(--surface-bg);
+        color: var(--text-secondary);
+        padding: 0 8px;
+        border-radius: 10px;
+        border: 1px solid var(--surface-border);
+        box-shadow: 0 8px 18px rgba(0, 0, 0, 0.35);
 }
 
 .noHuts #population {
-	display: none;
+        display: none;
 }
 
 div#village:before {
-	position: absolute;
-	background: white;
-	content: attr(data-legend);
-	left: 8px;
-	top: -13px;
+        position: absolute;
+        background: var(--surface-bg);
+        color: var(--text-secondary);
+        content: attr(data-legend);
+        left: 8px;
+        top: -13px;
+        padding: 0 8px;
+        border-radius: 10px;
+        border: 1px solid var(--surface-border);
+        box-shadow: 0 8px 18px rgba(0, 0, 0, 0.35);
 }
 
 div#workers {

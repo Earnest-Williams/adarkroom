@@ -1,8 +1,9 @@
 /**
  * Module that registers spaaaaaaaaace!
  */
-var Space = {	
-	SHIP_SPEED: 3,
+var Space = {
+        scene: 'space',
+        SHIP_SPEED: 3,
 	BASE_ASTEROID_DELAY: 500,
 	BASE_ASTEROID_SPEED: 1500,
 	FTB_SPEED: 60000,

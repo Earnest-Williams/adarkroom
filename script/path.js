@@ -1,4 +1,5 @@
 var Path = {
+        scene: 'path',
         DEFAULT_BAG_SPACE: 10,
         _STORES_OFFSET: 0,
         // Everything not in this list weighs 1

@@ -2,6 +2,7 @@
  * Module that registers the fabricator functionality
  */
 const Fabricator = {
+  scene: 'fabricator',
   _STORES_OFFSET: 0,
   name: _('Fabricator'),
   Craftables: {

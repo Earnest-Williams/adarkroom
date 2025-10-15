@@ -78,6 +78,17 @@
       doubleTime: false
     },
 
+    themeClasses: ['theme-default', 'theme-magic'],
+    sceneClasses: [
+      'scene-room',
+      'scene-outside',
+      'scene-path',
+      'scene-world',
+      'scene-ship',
+      'scene-space',
+      'scene-fabricator'
+    ],
+
     init: function(options) {
       this.options = $.extend(
         this.options,
@@ -326,6 +337,7 @@
       }
 
       Engine.initializeStartLocations('magic');
+      Engine.updateVisualTheme(Engine.activeModule || Room);
 
       if (typeof Room !== 'undefined' && typeof Room.updateButton === 'function') {
         Room.updateButton();
@@ -703,8 +715,43 @@
       }
 
       Engine.activeModule = module;
+      Engine.updateVisualTheme(module);
       module.onArrival(diff);
       Notifications.printQueue(module);
+    },
+
+    getSceneClass: function (module) {
+      if (module && typeof module.scene === 'string' && module.scene.length) {
+        return 'scene-' + module.scene;
+      }
+      return 'scene-room';
+    },
+
+    getThemeVariant: function () {
+      if (typeof Room !== 'undefined' && typeof Room.getStartVariant === 'function') {
+        var roomVariant = Room.getStartVariant();
+        if (roomVariant === 'magic') {
+          return 'magic';
+        }
+        return 'default';
+      }
+      if (typeof $SM !== 'undefined' && typeof $SM.get === 'function') {
+        var storedVariant = $SM.get('game.startVariant');
+        if (storedVariant === 'magic') {
+          return 'magic';
+        }
+      }
+      return 'default';
+    },
+
+    updateVisualTheme: function (activeModule) {
+      var body = $('body');
+      var variant = Engine.getThemeVariant();
+      var themeClass = 'theme-' + variant;
+      body.removeClass(Engine.themeClasses.join(' ')).addClass(themeClass);
+
+      var sceneClass = Engine.getSceneClass(activeModule);
+      body.removeClass(Engine.sceneClasses.join(' ')).addClass(sceneClass);
     },
 
     /* Move the stores panel beneath top_container (or to top: 0px if top_container
